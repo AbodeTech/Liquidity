@@ -14,18 +14,15 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft, ArrowRight, Save, CheckCircle } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { FormProgress } from "@/components/dashboard/form-progress"
 import { FileUpload } from "@/components/dashboard/file-upload"
 import { toast } from "sonner"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { applicationService } from "@/lib/services/user/applicationService"
+import { ApplicationSaveDraftRequestType } from "@/lib/types/user/application"
 
-// Mock user documents from Documents page
-const userDocuments = [
-  { id: "1", name: "Valid ID Card", fileName: "Drivers_License.pdf", uploadDate: "2024-01-15", status: "verified" },
-  { id: "2", name: "Proof of Address", fileName: "Utility_Bill.pdf", uploadDate: "2024-01-15", status: "verified" },
-  { id: "3", name: "Passport Photograph", fileName: "Passport_Photo.jpg", uploadDate: "2024-01-16", status: "verified" },
-]
 
 const requiredDocuments = [
   { key: "validId", label: "Valid ID Card (Driver's License, Int'l Passport, or Voter's Card)" },
@@ -37,15 +34,20 @@ const requiredDocuments = [
 
 export default function RentLoanPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const draftId = searchParams.get("draftId") || searchParams.get("draft")
+  const queryClient = useQueryClient()
+
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploadingDocs, setUploadingDocs] = useState<Record<string, boolean>>({})
 
   // Form data state
   const [formData, setFormData] = useState({
     // Step 1: Personal Information
-    fullName: "John Doe",
-    email: "john@example.com",
-    phone: "+234 801 234 5678",
+    fullName: "",
+    email: "",
+    phone: "",
     dateOfBirth: "",
     gender: "",
     maritalStatus: "",
@@ -76,31 +78,148 @@ export default function RentLoanPage() {
     // Step 4: KYC Documents
     bvn: "",
     nin: "",
-    documents: {} as Record<string, File | null>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    documents: {} as Record<string, any>,
 
     // Step 5: Review
     termsAccepted: false,
     declarationAccepted: false,
   })
 
-  // Load draft from localStorage
-  useEffect(() => {
-    const draft = localStorage.getItem("rentLoanDraft")
-    if (draft) {
-      setFormData(JSON.parse(draft))
-      toast.info("Draft Loaded", {
-        description: "Your saved application has been restored.",
-      })
-    }
-  }, [])
 
-  // Auto-save draft
+
+  console.log(formData)
+  // Fetch Draft Data
+  const { data: draftData, isLoading: isLoadingDraft } = useQuery({
+    queryKey: ['draft', draftId],
+    queryFn: () => applicationService.getDraft(draftId!),
+    enabled: !!draftId,
+  })
+
+  // Populate form with draft data
   useEffect(() => {
-    const timer = setTimeout(() => {
-      localStorage.setItem("rentLoanDraft", JSON.stringify(formData))
-    }, 2000)
-    return () => clearTimeout(timer)
-  }, [formData])
+    if (draftData?.data) {
+      const draft = draftData.data
+      setFormData(prev => ({
+        ...prev,
+        ...draft.personalInfo,
+        ...draft.employment,
+        ...draft.loanDetails,
+        currentStep: parseInt(draft.currentStep || "1"),
+        documents: draft.documents?.reduce((acc: Record<string, any>, doc: any) => ({
+          ...acc,
+          [doc.documentType]: doc
+        }), {}) || {},
+      }))
+      setCurrentStep(parseInt(draft.currentStep || "1"))
+      toast.info("Draft Loaded", { description: "Your saved application has been restored." })
+    }
+  }, [draftData])
+
+  // Get Payload Helper
+  const getPayloadFromData = (data: typeof formData): ApplicationSaveDraftRequestType => {
+    const documentsArray = Object.values(data.documents)
+    console.log(documentsArray)
+    return {
+      currentStep: currentStep.toString(),
+      personalInfo: {
+        fullName: data.fullName,
+        email: data.email,
+        phoneNumber: data.phone,
+        dateOfBirth: data.dateOfBirth,
+        gender: data.gender,
+        maritalStatus: data.maritalStatus,
+        numberOfDependents: Number(data.dependents || 0),
+      },
+      employment: {
+        employmentStatus: data.employmentStatus,
+        employer: data.employerName,
+        jobTitle: data.jobTitle,
+        monthlyIncome: data.monthlyIncome ? Number(data.monthlyIncome) : 0,
+        yearsEmployed: Number(data.yearsEmployed || 0),
+        officeAddress: data.workAddress,
+        employerPhone: data.officePhone,
+      },
+      loanDetails: {
+        loanAmount: Number(data.loanAmount || 0),
+        loanPurpose: "Rent Loan",
+        propertyAddress: data.propertyAddress,
+        landlordName: data.landlordName,
+        landlordPhone: data.landlordPhone,
+        // landlordEmail, landlordAccountName, landlordAccountNumber, landlordBankName omitted as per API requirements
+        monthlyRent: Number(data.rentAmount || 0),
+        repaymentPeriod: Number(data.rentDuration || 12),
+        preferredRepaymentDate: data.repaymentStartDate,
+      },
+      documents: documentsArray
+    }
+  }
+
+  // Mutations
+  const saveDraftMutation = useMutation({
+    mutationFn: (data: ApplicationSaveDraftRequestType) => {
+      if (draftId) {
+        return applicationService.updateDraft(draftId, data)
+      } else {
+        return applicationService.saveDraft(data)
+      }
+    },
+    onSuccess: (response) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const savedDraftId = (response.data as any)?.id || (response.data as any)?._id || draftId
+      if (savedDraftId && savedDraftId !== draftId) {
+        router.push(`/dashboard/apply/rent?draftId=${savedDraftId}`)
+      }
+      queryClient.invalidateQueries({ queryKey: ['drafts'] })
+    },
+    onError: () => {
+      // toast.error("Failed to save draft")
+    }
+  })
+
+  const uploadDocumentMutation = useMutation({
+    mutationFn: applicationService.uploadDocument,
+    onSuccess: (response, variables) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const docData = response.data as any
+      console.log(docData)
+
+      setFormData(prev => ({
+        ...prev,
+        documents: {
+          ...prev.documents,
+          [variables.documentType]: {
+            documentId: docData?.documentId,
+            documentType: variables?.documentType,
+            documentUrl: docData?.documentUrl,
+            uploadedAt: docData?.uploadedAt,
+          }
+        }
+      }))
+
+      setUploadingDocs(prev => ({ ...prev, [variables.documentType]: false }))
+      toast.success(`${variables.documentType} uploaded successfully`)
+    },
+    onError: (error, variables) => {
+      console.error("Upload error:", error)
+      setUploadingDocs(prev => ({ ...prev, [variables.documentType]: false }))
+      toast.error(`Failed to upload ${variables.documentType}`)
+    }
+  })
+
+  const submitApplicationMutation = useMutation({
+    mutationFn: applicationService.submitApplication,
+    onSuccess: () => {
+      toast.success("Application Submitted", { description: "Your rent loan application has been submitted successfully." })
+      router.push("/dashboard/applications")
+    },
+    onError: (error) => {
+      console.error("Submission error:", error)
+      toast.error("Failed to submit application. Please try again.")
+    }
+  })
+
+
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleInputChange = (field: string, value: any) => {
@@ -108,10 +227,8 @@ export default function RentLoanPage() {
   }
 
   const handleSaveDraft = () => {
-    localStorage.setItem("rentLoanDraft", JSON.stringify(formData))
-    toast.success("Draft Saved", {
-      description: "Your application has been saved.",
-    })
+    saveDraftMutation.mutate(getPayloadFromData(formData))
+    toast.success("Draft Saved")
   }
 
   const handleNext = () => {
@@ -126,23 +243,30 @@ export default function RentLoanPage() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
-    // Mock submission
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    localStorage.removeItem("rentLoanDraft")
-    toast.success("Application Submitted", {
-      description: "Your rent loan application has been submitted successfully.",
-    })
-    router.push("/dashboard/applications")
+
+    // Create base payload from current data
+    const basePayload = getPayloadFromData(formData)
+
+    // Create submission payload without currentStep
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { currentStep, ...submissionPayload } = basePayload
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload = {
+      ...submissionPayload,
+      draftId: draftId || undefined
+    } as any
+
+    submitApplicationMutation.mutate(payload)
+    // Don't set isSubmitting false immediately, wait for redirect
   }
 
-  // Check if document already exists in user's document library
-  const getDocumentStatus = (docKey: string) => {
-    const mapping: Record<string, string> = {
-      validId: "Valid ID Card",
-      proofOfAddress: "Proof of Address",
-      passport: "Passport Photograph",
-    }
-    return userDocuments.find(doc => doc.name === mapping[docKey])
+  const handleFileUpload = (file: File, key: string) => {
+    setUploadingDocs(prev => ({ ...prev, [key]: true }))
+    uploadDocumentMutation.mutate({
+      file,
+      documentType: key
+    })
   }
 
   const steps = [
@@ -152,6 +276,12 @@ export default function RentLoanPage() {
     "Documents",
     "Review & Submit"
   ]
+
+  if (isLoadingDraft) {
+    return <div className="min-h-screen flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-20">
@@ -310,17 +440,13 @@ export default function RentLoanPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="monthlyIncome">Monthly Income *</Label>
-                  <Select value={formData.monthlyIncome} onValueChange={(value) => handleInputChange("monthlyIncome", value)}>
-                    <SelectTrigger id="monthlyIncome">
-                      <SelectValue placeholder="Select income range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="100000-250000">₦100,000 - ₦250,000</SelectItem>
-                      <SelectItem value="250000-500000">₦250,000 - ₦500,000</SelectItem>
-                      <SelectItem value="500000-1000000">₦500,000 - ₦1,000,000</SelectItem>
-                      <SelectItem value="1000000+">₦1,000,000+</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    id="monthlyIncome"
+                    type="number"
+                    value={formData.monthlyIncome}
+                    onChange={(e) => handleInputChange("monthlyIncome", e.target.value)}
+                    placeholder="Enter monthly income"
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -534,48 +660,55 @@ export default function RentLoanPage() {
                 </p>
 
                 {requiredDocuments.map((doc) => {
-                  const existingDoc = getDocumentStatus(doc.key)
+                  const uploadedDoc = formData.documents[doc.key]
 
                   return (
                     <div key={doc.key} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label>{doc.label} *</Label>
-                        {existingDoc && (
+                        {uploadedDoc && (
                           <div className="flex items-center gap-2 text-sm text-green-600">
                             <CheckCircle className="w-4 h-4" />
-                            Already uploaded
+                            Uploaded
                           </div>
                         )}
                       </div>
 
-                      {existingDoc ? (
+                      {uploadedDoc ? (
                         <Card className="border-green-500/20 bg-green-500/5">
                           <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                               <div>
-                                <p className="font-medium">{existingDoc.fileName}</p>
+                                <p className="font-medium">{doc.label}</p>
                                 <p className="text-xs text-muted-foreground">
-                                  Uploaded on {new Date(existingDoc.uploadDate).toLocaleDateString()}
+                                  Uploaded on {new Date(uploadedDoc.uploadedAt).toLocaleDateString()}
                                 </p>
                               </div>
                               <div className="flex gap-2">
-                                <Button variant="outline" size="sm">View</Button>
-                                <Button variant="outline" size="sm">Replace</Button>
+                                <Button variant="outline" size="sm" onClick={() => {
+                                  const newDocs = { ...formData.documents }
+                                  delete newDocs[doc.key]
+                                  setFormData(prev => ({ ...prev, documents: newDocs }))
+                                }}>Replace</Button>
                               </div>
                             </div>
                           </CardContent>
                         </Card>
                       ) : (
-                        <FileUpload
-                          onFileSelect={(file) => {
-                            handleInputChange("documents", {
-                              ...formData.documents,
-                              [doc.key]: file
-                            })
-                          }}
-                          maxSize={5}
-                          acceptedTypes={[".pdf", ".jpg", ".jpeg", ".png"]}
-                        />
+                        <div className="relative">
+                          {uploadingDocs[doc.key] ? (
+                            <div className="flex items-center justify-center p-6 border-2 border-dashed rounded-lg">
+                              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                              <span className="ml-2 text-sm text-muted-foreground">Uploading...</span>
+                            </div>
+                          ) : (
+                            <FileUpload
+                              onFileSelect={(file) => handleFileUpload(file, doc.key)}
+                              maxSize={5}
+                              acceptedTypes={[".pdf", ".jpg", ".jpeg", ".png"]}
+                            />
+                          )}
+                        </div>
                       )}
                     </div>
                   )
@@ -646,8 +779,7 @@ export default function RentLoanPage() {
                     <h3 className="font-semibold mb-3">Documents</h3>
                     <div className="space-y-2">
                       {requiredDocuments.map((doc) => {
-                        const existingDoc = getDocumentStatus(doc.key)
-                        const uploaded = existingDoc || formData.documents[doc.key]
+                        const uploaded = formData.documents[doc.key]
 
                         return (
                           <div key={doc.key} className="flex items-center justify-between text-sm">
@@ -716,8 +848,8 @@ export default function RentLoanPage() {
               Back
             </Button>
           )}
-          <Button variant="outline" onClick={handleSaveDraft}>
-            <Save className="w-4 h-4 mr-2" />
+          <Button variant="outline" onClick={handleSaveDraft} disabled={saveDraftMutation.isPending}>
+            {saveDraftMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             Save Draft
           </Button>
         </div>
@@ -730,9 +862,13 @@ export default function RentLoanPage() {
         ) : (
           <Button
             onClick={handleSubmit}
-            disabled={!formData.termsAccepted || !formData.declarationAccepted || isSubmitting}
+            disabled={!formData.termsAccepted || !formData.declarationAccepted || isSubmitting || submitApplicationMutation.isPending}
           >
-            {isSubmitting ? "Submitting..." : "Submit Application"}
+            {(isSubmitting || submitApplicationMutation.isPending) ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...
+              </>
+            ) : "Submit Application"}
           </Button>
         )}
       </div>

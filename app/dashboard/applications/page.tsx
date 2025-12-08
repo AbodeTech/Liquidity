@@ -6,133 +6,103 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Plus, ArrowLeft, LogOut, User, FileText } from "lucide-react"
+import { Search, Plus, ArrowLeft, LogOut, User, FileText, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ApplicationDetailModal } from "@/components/dashboard/application-detail-modal"
-
-// Mock data for user's applications
-const allApplications = [
-  {
-    id: "LIQ-RENT-001",
-    loanType: "Rent Loan",
-    amount: 1500000,
-    date: "2024-01-15",
-    status: "approved" as const,
-    tenure: 12,
-    monthlyPayment: 135000,
-    personalInfo: {
-      fullName: "John Doe",
-      email: "john@example.com",
-      phone: "+234 801 234 5678",
-      employment: "Employed",
-      monthlyIncome: 350000,
-    },
-    rentDetails: {
-      propertyAddress: "15 Admiralty Way, Lekki Phase 1, Lagos",
-      landlordName: "Mr. Adebayo Williams",
-      landlordContact: "+234 802 345 6789",
-      rentAmount: 1500000,
-      rentDuration: 12,
-    },
-    documents: [
-      { name: "Driver's License", status: "verified" },
-      { name: "Utility Bill", status: "verified" },
-      { name: "Passport Photo", status: "verified" },
-    ],
-    statusHistory: [
-      { status: "submitted", date: "2024-01-15", time: "10:30 AM" },
-      { status: "in-review", date: "2024-01-16", time: "2:15 PM" },
-      { status: "approved", date: "2024-01-18", time: "11:45 AM" },
-    ],
-  },
-  {
-    id: "LIQ-LAND-002",
-    loanType: "Land Loan",
-    amount: 3000000,
-    date: "2024-01-20",
-    status: "pending" as const,
-    tenure: 24,
-    personalInfo: {
-      fullName: "John Doe",
-      email: "john@example.com",
-      phone: "+234 801 234 5678",
-      employment: "Employed",
-      monthlyIncome: 350000,
-    },
-    landDetails: {
-      landLocation: "Epe, Lagos State",
-      landSize: "600 sqm",
-      landCost: 3000000,
-      developerName: "Prime Properties Ltd",
-      developerContact: "+234 804 567 8901",
-    },
-    documents: [
-      { name: "Driver's License", status: "pending" },
-      { name: "Utility Bill", status: "pending" },
-      { name: "Passport Photo", status: "pending" },
-    ],
-    statusHistory: [{ status: "submitted", date: "2024-01-20", time: "9:00 AM" }],
-  },
-]
+import { useQuery } from "@tanstack/react-query"
+import { applicationService } from "@/lib/services/user/applicationService"
 
 type StatusFilter = "all" | "pending" | "in-review" | "approved" | "rejected"
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; className: string }> = {
   pending: { label: "Pending", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
   "in-review": { label: "In Review", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
   approved: { label: "Approved", className: "bg-green-500/10 text-green-600 border-green-500/20" },
   rejected: { label: "Rejected", className: "bg-red-500/10 text-red-600 border-red-500/20" },
+  submitted: { label: "Submitted", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
 }
 
 export default function ApplicationsPage() {
   const router = useRouter()
-  const [userName, setUserName] = useState("")
+  // const [userName, setUserName] = useState("")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [loanTypeFilter, setLoanTypeFilter] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedApplication, setSelectedApplication] = useState<(typeof allApplications)[0] | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [selectedApplication, setSelectedApplication] = useState<any | null>(null)
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn")
-    if (!isLoggedIn) {
-      router.push("/login")
-      return
+  const { data: applications = [], isLoading } = useQuery({
+    queryKey: ['applications', statusFilter],
+    queryFn: async () => {
+      const response = await applicationService.getApplications({
+        status: statusFilter === "all" ? undefined : statusFilter
+      })
+      return response.data || []
     }
-    const name = localStorage.getItem("userName") || "User"
-    setUserName(name)
-  }, [router])
+  })
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn")
-    localStorage.removeItem("userEmail")
-    localStorage.removeItem("userName")
-    router.push("/")
-  }
-
-  // Filter applications
-  const filteredApplications = allApplications.filter((app) => {
-    const matchesStatus = statusFilter === "all" || app.status === statusFilter
-    const matchesLoanType = loanTypeFilter === "all" || app.loanType === loanTypeFilter
+  // Filter applications client-side for loanType and search (since API might only support status)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filteredApplications = applications.filter((app: any) => {
+    // Status is already filtered by API if not 'all', but double check if we want to rely on that or client filter
+    // For now, let's assume API handles status, but we can double check. 
+    // Actually, if we refetch on status change, we trust the API. 
+    // But we still need to filter by loanType and search
+    const matchesLoanType = loanTypeFilter === "all" || app.loanDetails?.loanPurpose === loanTypeFilter
     const matchesSearch =
-      app.id.toLowerCase().includes(searchQuery.toLowerCase()) || app.amount.toString().includes(searchQuery)
+      app._id?.toLowerCase().includes(searchQuery.toLowerCase()) || app.loanDetails?.loanAmount?.toString().includes(searchQuery)
+    return matchesLoanType && matchesSearch
+  })
+
+  // Count by status - Note: getting accurate counts for ALL statuses might require a separate API call or 
+  // just counting what we have if we fetched 'all'. 
+  // For simpler implementation, we might simulate counts or remove them if API doesn't support aggregate.
+  // For now, let's try to calculate from the current list if 'all' is selected, otherwise it might be inaccurate.
+  // Ideally we fetch 'all' and filter client side if the dataset is small.
+  // Let's stick to API filtering for status to be performant, 
+  // but this means counts won't update for all tabs unless we fetch statistics.
+  // We will hide the counts for now or keep them as '?' if not 'all'.
+
+  // Actually, better approach for now: Fetch ALL and filter client side since traffic is low?
+  // Let's stick to the previous implementation's logic of filtering client side which suggests fetching all.
+  // But wait, the previous code filtered `allApplications`.
+
+  // Let's modify: Fetch ALL applications, then filter client side. This restores the counters too.
+
+  const { data: allFetchedApplications = [], isLoading: isLoadingAll } = useQuery({
+    queryKey: ['applications', 'all'],
+    queryFn: async () => {
+      const response = await applicationService.getApplications({})
+      return response.data || []
+    }
+  })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const clientFilteredApplications = allFetchedApplications.filter((app: any) => {
+    const matchesStatus = statusFilter === "all" || app.status === statusFilter
+    const matchesLoanType = loanTypeFilter === "all" || app.loanDetails?.loanPurpose === loanTypeFilter
+    const matchesSearch =
+      app._id?.toLowerCase().includes(searchQuery.toLowerCase()) || app.loanDetails?.loanAmount?.toString().includes(searchQuery)
     return matchesStatus && matchesLoanType && matchesSearch
   })
 
-  // Count by status
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const statusCounts = {
-    all: allApplications.length,
-    pending: allApplications.filter((a) => a.status === "pending").length,
-    "in-review": allApplications.filter((a) => a.status === "in-review").length,
-    approved: allApplications.filter((a) => a.status === "approved").length,
-    rejected: allApplications.filter((a) => a.status === "rejected").length,
+    all: allFetchedApplications.length,
+    pending: allFetchedApplications.filter((a: any) => a.status === "pending").length,
+    "in-review": allFetchedApplications.filter((a: any) => a.status === "in-review").length,
+    approved: allFetchedApplications.filter((a: any) => a.status === "approved").length,
+    rejected: allFetchedApplications.filter((a: any) => a.status === "rejected").length,
+  }
+
+  const handleLogout = () => {
+    // Auth handled in parent/topbar
+    router.push("/login")
   }
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      
-
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -226,7 +196,11 @@ export default function ApplicationsPage() {
         </Card>
 
         {/* Applications List */}
-        {filteredApplications.length === 0 ? (
+        {isLoadingAll ? (
+          <div className="flex justify-center p-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : allFetchedApplications.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="p-12 text-center">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
@@ -247,26 +221,27 @@ export default function ApplicationsPage() {
           <>
             {/* Mobile: Card View */}
             <div className="lg:hidden space-y-3">
-              {filteredApplications.map((app) => (
-                <Card key={app.id} className="border-border">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {allFetchedApplications.map((app: any) => (
+                <Card key={app._id} className="border-border">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <p className="font-semibold">{app.loanType}</p>
-                        <p className="text-sm text-muted-foreground">ID: {app.id}</p>
+                        <p className="font-semibold">{app.loanDetails?.loanPurpose}</p>
+                        <p className="text-sm text-muted-foreground">ID: {app._id}</p>
                       </div>
-                      <Badge variant="outline" className={statusConfig[app.status].className}>
-                        {statusConfig[app.status].label}
+                      <Badge variant="outline" className={statusConfig[app.status]?.className}>
+                        {statusConfig[app.status]?.label || app.status}
                       </Badge>
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Amount:</span>
-                        <span className="font-medium">₦{app.amount.toLocaleString()}</span>
+                        <span className="font-medium">₦{Number(app.loanDetails?.loanAmount).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Date:</span>
-                        <span>{new Date(app.date).toLocaleDateString()}</span>
+                        <span>{new Date(app.date || app.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                     <Button
@@ -298,15 +273,16 @@ export default function ApplicationsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredApplications.map((app) => (
-                        <tr key={app.id} className="border-b border-border last:border-0 hover:bg-muted/50">
-                          <td className="p-4 text-sm font-medium">{app.id}</td>
-                          <td className="p-4 text-sm">{app.loanType}</td>
-                          <td className="p-4 text-sm">₦{app.amount.toLocaleString()}</td>
-                          <td className="p-4 text-sm">{new Date(app.date).toLocaleDateString()}</td>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      {clientFilteredApplications.map((app: any) => (
+                        <tr key={app._id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                          <td className="p-4 text-sm font-medium">{app._id}</td>
+                          <td className="p-4 text-sm">{app.loanDetails?.loanPurpose}</td>
+                          <td className="p-4 text-sm">₦{Number(app.loanDetails?.loanAmount).toLocaleString()}</td>
+                          <td className="p-4 text-sm">{new Date(app.date || app.createdAt).toLocaleDateString()}</td>
                           <td className="p-4">
-                            <Badge variant="outline" className={statusConfig[app.status].className}>
-                              {statusConfig[app.status].label}
+                            <Badge variant="outline" className={statusConfig[app.status]?.className}>
+                              {statusConfig[app.status]?.label || app.status}
                             </Badge>
                           </td>
                           <td className="p-4">
@@ -327,8 +303,13 @@ export default function ApplicationsPage() {
 
       {/* Application Detail Modal */}
       {selectedApplication && (
-        <ApplicationDetailModal application={selectedApplication} onClose={() => setSelectedApplication(null)} />
+        <ApplicationDetailModal
+          isOpen={!!selectedApplication}
+          application={selectedApplication}
+          onClose={() => setSelectedApplication(null)}
+        />
       )}
     </div>
   )
 }
+

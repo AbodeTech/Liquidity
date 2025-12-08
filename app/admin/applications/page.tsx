@@ -7,89 +7,78 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Link from "next/link"
-import { Search } from "lucide-react"
-import { useState } from "react"
-
-// Mock data - expanded list
-const allApplications = [
-  {
-    id: "APP-2024-001",
-    name: "Adebayo Johnson",
-    email: "adebayo.j@email.com",
-    type: "Rent",
-    amount: "₦2,500,000",
-    date: "2024-01-15",
-    status: "pending",
-  },
-  {
-    id: "APP-2024-002",
-    name: "Chioma Okafor",
-    email: "chioma.o@email.com",
-    type: "Land",
-    amount: "₦5,000,000",
-    date: "2024-01-15",
-    status: "approved",
-  },
-  {
-    id: "APP-2024-003",
-    name: "Ibrahim Musa",
-    email: "ibrahim.m@email.com",
-    type: "Rent",
-    amount: "₦1,800,000",
-    date: "2024-01-14",
-    status: "pending",
-  },
-  {
-    id: "APP-2024-004",
-    name: "Ngozi Eze",
-    email: "ngozi.e@email.com",
-    type: "Land",
-    amount: "₦8,500,000",
-    date: "2024-01-14",
-    status: "approved",
-  },
-  {
-    id: "APP-2024-005",
-    name: "Oluwaseun Balogun",
-    email: "oluwaseun.b@email.com",
-    type: "Rent",
-    amount: "₦3,200,000",
-    date: "2024-01-13",
-    status: "rejected",
-  },
-  {
-    id: "APP-2024-006",
-    name: "Fatima Abubakar",
-    email: "fatima.a@email.com",
-    type: "Land",
-    amount: "₦12,000,000",
-    date: "2024-01-13",
-    status: "pending",
-  },
-  {
-    id: "APP-2024-007",
-    name: "Emeka Nwosu",
-    email: "emeka.n@email.com",
-    type: "Rent",
-    amount: "₦4,500,000",
-    date: "2024-01-12",
-    status: "approved",
-  },
-  {
-    id: "APP-2024-008",
-    name: "Aisha Mohammed",
-    email: "aisha.m@email.com",
-    type: "Land",
-    amount: "₦6,800,000",
-    date: "2024-01-12",
-    status: "pending",
-  },
-]
+import { Search, Loader2 } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { adminApplicationService } from "@/lib/services/admin/applicationService"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { format } from "date-fns"
+import { Application } from "@/lib/types/admin/application"
+import { useDebounce } from "@/hooks/use-debounce"
 
 export default function ApplicationsPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [loanTypeFilter, setLoanTypeFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  // Get filters from URL
+  const page = Number(searchParams.get("page")) || 1
+  const search = searchParams.get("search") || ""
+  const status = searchParams.get("status") || "all"
+  const type = searchParams.get("type") || "all"
+
+  // Local state for search input to handle debouncing
+  const [searchTerm, setSearchTerm] = useState(search)
+  const debouncedSearch = useDebounce(searchTerm, 500)
+
+  // Update URL when filters change
+  const updateFilters = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams)
+    if (value && value !== "all") {
+      params.set(key, value)
+    } else {
+      params.delete(key)
+    }
+    // Reset to page 1 on filter change
+    if (key !== "page") {
+      params.set("page", "1")
+    }
+    router.push(`${pathname}?${params.toString()}`)
+  }
+
+  // Sync debounced search with URL
+  useEffect(() => {
+    if (debouncedSearch !== search) {
+      updateFilters("search", debouncedSearch)
+    }
+  }, [debouncedSearch])
+
+  // Fetch applications
+  const { data: applicationsData, isLoading } = useQuery({
+    queryKey: ["applications", page, search, status, type],
+    queryFn: () => adminApplicationService.getApplications({
+      page,
+      limit: 10,
+      search: search || undefined,
+      status: status !== "all" ? status : undefined,
+      type: type !== "all" ? type : undefined,
+    }),
+  })
+
+  console.log(applicationsData)
+
+  const applications: Application[] = applicationsData?.data?.data || []
+  const meta = applicationsData?.data?.pagination
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "approved": return "bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20"
+      case "rejected": return "bg-red-500/10 text-red-700 hover:bg-red-500/20"
+      case "under_review": return "bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"
+      case "submitted": return "bg-blue-500/10 text-blue-700 hover:bg-blue-500/20"
+      default: return "bg-slate-500/10 text-slate-700 hover:bg-slate-500/20"
+    }
+  }
 
   return (
     <AdminLayout>
@@ -116,7 +105,7 @@ export default function ApplicationsPage() {
               </div>
 
               {/* Loan Type Filter */}
-              <Select value={loanTypeFilter} onValueChange={setLoanTypeFilter}>
+              <Select value={type} onValueChange={(val) => updateFilters("type", val)}>
                 <SelectTrigger className="w-full md:w-[180px]">
                   <SelectValue placeholder="Loan Type" />
                 </SelectTrigger>
@@ -128,13 +117,15 @@ export default function ApplicationsPage() {
               </Select>
 
               {/* Status Filter */}
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={status} onValueChange={(val) => updateFilters("status", val)}>
                 <SelectTrigger className="w-full md:w-[180px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="submitted">Submitted</SelectItem>
+                  <SelectItem value="under_review">Under Review</SelectItem>
                   <SelectItem value="approved">Approved</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
@@ -143,143 +134,166 @@ export default function ApplicationsPage() {
           </CardContent>
         </Card>
 
-        {/* Applications Table - Desktop */}
-        <div className="hidden md:block">
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="border-b bg-muted/50">
-                    <tr>
-                      <th className="text-left p-4 font-medium text-sm">Application ID</th>
-                      <th className="text-left p-4 font-medium text-sm">Applicant</th>
-                      <th className="text-left p-4 font-medium text-sm">Type</th>
-                      <th className="text-left p-4 font-medium text-sm">Amount</th>
-                      <th className="text-left p-4 font-medium text-sm">Date Submitted</th>
-                      <th className="text-left p-4 font-medium text-sm">Status</th>
-                      <th className="text-left p-4 font-medium text-sm">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {allApplications.map((app) => (
-                      <tr key={app.id} className="hover:bg-muted/50 transition-colors">
-                        <td className="p-4">
-                          <Link href={`/admin/applications/${app.id}`} className="font-medium text-sm hover:underline">
-                            {app.id}
-                          </Link>
-                        </td>
-                        <td className="p-4">
+        {/* Applications List */}
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <>
+            {/* Desktop Table */}
+            <div className="hidden md:block">
+              <Card>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="border-b bg-muted/50">
+                        <tr>
+                          <th className="text-left p-4 font-medium text-sm">Application ID</th>
+                          <th className="text-left p-4 font-medium text-sm">Applicant</th>
+                          <th className="text-left p-4 font-medium text-sm">Type</th>
+                          <th className="text-left p-4 font-medium text-sm">Amount</th>
+                          <th className="text-left p-4 font-medium text-sm">Date Submitted</th>
+                          <th className="text-left p-4 font-medium text-sm">Status</th>
+                          <th className="text-left p-4 font-medium text-sm">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {applications.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                              No applications found matching your filters.
+                            </td>
+                          </tr>
+                        ) : (
+                          applications.map((app) => (
+                            <tr key={app._id} className="hover:bg-muted/50 transition-colors">
+                              <td className="p-4">
+                                <Link href={`/admin/applications/${app._id}`} className="font-medium text-sm hover:underline">
+                                  {app._id.substring(0, 8).toUpperCase()}
+                                </Link>
+                              </td>
+                              <td className="p-4">
+                                <div>
+                                  <p className="font-medium text-sm">{app.personalInfo.fullName}</p>
+                                  <p className="text-xs text-muted-foreground">{app.personalInfo.email}</p>
+                                </div>
+                              </td>
+                              <td className="p-4">
+                                <Badge variant="outline" className="text-xs capitalize">
+                                  {app.loanDetails.loanPurpose}
+                                </Badge>
+                              </td>
+                              <td className="p-4 font-medium text-sm">
+                                {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(app.loanDetails.loanAmount)}
+                              </td>
+                              <td className="p-4 text-sm text-muted-foreground">
+                                {app.submittedAt ? format(new Date(app.submittedAt), 'MMM dd, yyyy') : 'N/A'}
+                              </td>
+                              <td className="p-4">
+                                <Badge
+                                  variant="secondary"
+                                  className={`${getStatusColor(app.status)} capitalize`}
+                                >
+                                  {app.status.replace("_", " ")}
+                                </Badge>
+                              </td>
+                              <td className="p-4">
+                                <Link href={`/admin/applications/${app._id}`}>
+                                  <Button variant="ghost" size="sm">
+                                    View Details
+                                  </Button>
+                                </Link>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-4">
+              {applications.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No applications found.</p>
+              ) : (
+                applications.map((app) => (
+                  <Card key={app._id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
                           <div>
-                            <p className="font-medium text-sm">{app.name}</p>
-                            <p className="text-xs text-muted-foreground">{app.email}</p>
+                            <Link href={`/admin/applications/${app._id}`} className="font-medium text-sm hover:underline">
+                              {app._id.substring(0, 8).toUpperCase()}
+                            </Link>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {app.submittedAt ? format(new Date(app.submittedAt), 'MMM dd, yyyy') : 'N/A'}
+                            </p>
                           </div>
-                        </td>
-                        <td className="p-4">
-                          <Badge variant="outline" className="text-xs">
-                            {app.type}
-                          </Badge>
-                        </td>
-                        <td className="p-4 font-medium text-sm">{app.amount}</td>
-                        <td className="p-4 text-sm text-muted-foreground">{app.date}</td>
-                        <td className="p-4">
                           <Badge
-                            variant={
-                              app.status === "approved"
-                                ? "default"
-                                : app.status === "rejected"
-                                  ? "destructive"
-                                  : "secondary"
-                            }
-                            className={
-                              app.status === "approved"
-                                ? "bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20"
-                                : app.status === "pending"
-                                  ? "bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"
-                                  : ""
-                            }
+                            variant="secondary"
+                            className={`${getStatusColor(app.status)} capitalize`}
                           >
-                            {app.status}
+                            {app.status.replace("_", " ")}
                           </Badge>
-                        </td>
-                        <td className="p-4">
-                          <Link href={`/admin/applications/${app.id}`}>
+                        </div>
+                        <div>
+                          <p className="font-medium">{app.personalInfo.fullName}</p>
+                          <p className="text-sm text-muted-foreground">{app.personalInfo.email}</p>
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {app.loanDetails.loanPurpose}
+                            </Badge>
+                            <span className="font-medium text-sm">
+                              {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(app.loanDetails.loanAmount)}
+                            </span>
+                          </div>
+                          <Link href={`/admin/applications/${app._id}`}>
                             <Button variant="ghost" size="sm">
-                              View Details
+                              View
                             </Button>
                           </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
 
-        {/* Applications Cards - Mobile */}
-        <div className="md:hidden space-y-4">
-          {allApplications.map((app) => (
-            <Card key={app.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <Link href={`/admin/applications/${app.id}`} className="font-medium text-sm hover:underline">
-                        {app.id}
-                      </Link>
-                      <p className="text-xs text-muted-foreground mt-1">{app.date}</p>
-                    </div>
-                    <Badge
-                      variant={
-                        app.status === "approved" ? "default" : app.status === "rejected" ? "destructive" : "secondary"
-                      }
-                      className={
-                        app.status === "approved"
-                          ? "bg-emerald-500/10 text-emerald-700"
-                          : app.status === "pending"
-                            ? "bg-amber-500/10 text-amber-700"
-                            : ""
-                      }
-                    >
-                      {app.status}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="font-medium">{app.name}</p>
-                    <p className="text-sm text-muted-foreground">{app.email}</p>
-                  </div>
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {app.type}
-                      </Badge>
-                      <span className="font-medium text-sm">{app.amount}</span>
-                    </div>
-                    <Link href={`/admin/applications/${app.id}`}>
-                      <Button variant="ghost" size="sm">
-                        View
-                      </Button>
-                    </Link>
-                  </div>
+            {/* Pagination */}
+            {meta && meta.totalPages > 1 && (
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Showing {(meta.page - 1) * meta.limit + 1}-{Math.min(meta.page * meta.limit, meta.total)} of {meta.total} applications
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={meta.page === 1}
+                    onClick={() => updateFilters("page", (meta.page - 1).toString())}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={meta.page === meta.totalPages}
+                    onClick={() => updateFilters("page", (meta.page + 1).toString())}
+                  >
+                    Next
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Pagination */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Showing 1-8 of 8 applications</p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled>
-              Previous
-            </Button>
-            <Button variant="outline" size="sm" disabled>
-              Next
-            </Button>
-          </div>
-        </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </AdminLayout>
   )

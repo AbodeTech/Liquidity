@@ -13,13 +13,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter()
 
-  // Mock authentication check
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn')
-    if (!isLoggedIn) {
-      router.push('/login')
-    }
-  }, [router])
+
 
   return (
     <div className="flex h-screen bg-background">

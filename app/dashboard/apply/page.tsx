@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Home, MapPin, ArrowLeft, Pencil, Trash2, Clock, LogOut, User } from "lucide-react"
+import { Home, MapPin, ArrowLeft, Pencil, Trash2, Clock, LogOut, User, Loader2 } from "lucide-react"
 import Link from "next/link"
 import {
   AlertDialog,
@@ -17,49 +17,43 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-
-// Mock drafts data
-const mockDrafts = [
-  {
-    id: "draft-001",
-    type: "Rent Loan",
-    lastUpdated: "2024-01-25",
-    step: 2,
-    totalSteps: 5,
-    amount: 1200000,
-  },
-  {
-    id: "draft-002",
-    type: "Land Loan",
-    lastUpdated: "2024-01-20",
-    step: 3,
-    totalSteps: 5,
-    amount: 2500000,
-  },
-]
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { applicationService } from "@/lib/services/user/applicationService"
+import { toast } from "sonner"
 
 export default function DashboardApplyPage() {
   const router = useRouter()
-  const [userName, setUserName] = useState("")
-  const [drafts, setDrafts] = useState(mockDrafts)
+  // const [userName, setUserName] = useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [draftToDelete, setDraftToDelete] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn")
-    if (!isLoggedIn) {
-      router.push("/login")
-      return
+  const { data: drafts = [], isLoading } = useQuery({
+    queryKey: ['drafts'],
+    queryFn: async () => {
+      const response = await applicationService.getDrafts()
+      return response.data || []
     }
-    const name = localStorage.getItem("userName") || "User"
-    setUserName(name)
-  }, [router])
+  })
+
+  const deleteDraftMutation = useMutation({
+    mutationFn: applicationService.deleteDraft,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['drafts'] })
+      toast.success("Draft deleted successfully")
+      setDeleteDialogOpen(false)
+      setDraftToDelete(null)
+    },
+    onError: () => {
+      toast.error("Failed to delete draft")
+      setDeleteDialogOpen(false)
+      setDraftToDelete(null)
+    }
+  })
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn")
-    localStorage.removeItem("userEmail")
-    localStorage.removeItem("userName")
-    router.push("/")
+    // Auth handled in parent
+    router.push("/login")
   }
 
   const handleDeleteDraft = (id: string) => {
@@ -68,36 +62,16 @@ export default function DashboardApplyPage() {
   }
 
   const confirmDelete = () => {
+    console.log(draftToDelete)
     if (draftToDelete) {
-      setDrafts(drafts.filter((d) => d.id !== draftToDelete))
+      deleteDraftMutation.mutate(draftToDelete)
     }
-    setDeleteDialogOpen(false)
-    setDraftToDelete(null)
   }
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="bg-background border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-foreground">
-            Liquidity
-          </Link>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <User className="h-4 w-4" />
-              <span>{userName}</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto ">
         <div className="mb-8">
           <Link
             href="/dashboard"
@@ -122,7 +96,7 @@ export default function DashboardApplyPage() {
                 </div>
                 <CardTitle>Rent Loan</CardTitle>
                 <CardDescription>
-                  Get financing for your annual rent payment. We pay your landlord directly.
+                  Get financing for your rent payment. We pay your landlord directly.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -161,17 +135,27 @@ export default function DashboardApplyPage() {
         </div>
 
         {/* Saved Drafts Section */}
-        {drafts.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold text-foreground mb-4">Saved Drafts</h2>
+        {/* Saved Drafts Section */}
+        <div>
+          <h2 className="text-xl font-semibold text-foreground mb-4">Saved Drafts</h2>
+          {isLoading ? (
+            <div className="flex justify-center p-8 border rounded-lg border-dashed">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : drafts.length === 0 ? (
+            <div className="p-8 text-center border rounded-lg border-dashed text-muted-foreground">
+              <p>No draft have been saved</p>
+            </div>
+          ) : (
             <div className="space-y-4 max-w-4xl">
-              {drafts.map((draft) => (
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {drafts.map((draft: any) => (
                 <Card key={draft.id} className="border-border">
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-start gap-4">
                         <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center shrink-0">
-                          {draft.type === "Rent Loan" ? (
+                          {draft.type === "Rent Loan" || draft.loanType === "Rent Loan" || !draft.loanType ? (
                             <Home className="h-5 w-5 text-muted-foreground" />
                           ) : (
                             <MapPin className="h-5 w-5 text-muted-foreground" />
@@ -179,24 +163,24 @@ export default function DashboardApplyPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold">{draft.type}</h3>
+                            <h3 className="font-semibold">{draft.type || draft.loanDetails?.loanType || "Rent Loan"}</h3>
                             <Badge variant="outline" className="text-xs">
                               Draft
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            ₦{draft.amount.toLocaleString()} • Step {draft.step} of {draft.totalSteps}
+                            ₦{Number(draft.amount || draft.loanDetails?.loanAmount || 0).toLocaleString()} • Step {draft.currentStep || draft.step || 1} of 5
                           </p>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                             <Clock className="h-3 w-3" />
-                            Last updated: {new Date(draft.lastUpdated).toLocaleDateString()}
+                            Last updated: {new Date(draft.lastUpdated || draft.updatedAt || new Date()).toLocaleDateString()}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 sm:shrink-0">
                         <Button variant="outline" size="sm" asChild>
                           <Link
-                            href={`/dashboard/apply/${draft.type === "Rent Loan" ? "rent" : "land"}?draft=${draft.id}`}
+                            href={`/dashboard/apply/${(draft.type === "Rent Loan" || draft.loanType === "Rent Loan" || !draft.loanType) ? "rent" : "land"}?draft=${draft._id}`}
                           >
                             <Pencil className="h-4 w-4 mr-1" />
                             Continue
@@ -206,9 +190,14 @@ export default function DashboardApplyPage() {
                           variant="ghost"
                           size="sm"
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDeleteDraft(draft.id)}
+                          onClick={() => handleDeleteDraft(draft._id)}
+                          disabled={deleteDraftMutation.isPending}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {deleteDraftMutation.isPending && draftToDelete === draft._id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -217,7 +206,7 @@ export default function DashboardApplyPage() {
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-primary rounded-full transition-all"
-                          style={{ width: `${(draft.step / draft.totalSteps) * 100}%` }}
+                          style={{ width: `${((draft.currentStep || draft.step || 1) / 5) * 100}%` }}
                         />
                       </div>
                     </div>
@@ -225,8 +214,8 @@ export default function DashboardApplyPage() {
                 </Card>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
 
       {/* Delete Confirmation Dialog */}
@@ -239,12 +228,13 @@ export default function DashboardApplyPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteDraftMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteDraftMutation.isPending}
             >
-              Delete
+              {deleteDraftMutation.isPending ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -252,3 +242,4 @@ export default function DashboardApplyPage() {
     </div>
   )
 }
+

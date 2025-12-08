@@ -12,14 +12,28 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Bell, LogOut, User, Settings } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useUserProfile } from '@/lib/store/userProfile'
+import { auth } from '@/lib/auth'
 
 export function DashboardTopBar() {
   const router = useRouter()
+  const { user, clearUser } = useUserProfile()
 
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn')
+    auth.removeToken()
+    clearUser()
     router.push('/login')
   }
+
+  const getInitials = (name: string) => {
+    if (!name) return "JD"
+    const parts = name.split(" ")
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase()
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+  }
+
+  const userInitials = getInitials(user?.fullName || "")
+  const firstName = user?.fullName?.split(" ")[0] || "User"
 
   return (
     <header className="sticky top-0 z-30 bg-background border-b border-border">
@@ -27,23 +41,22 @@ export function DashboardTopBar() {
         <div className="flex items-center gap-2">
           <span className="text-2xl">👋</span>
           <h1 className="text-lg font-semibold text-foreground hidden sm:block">
-            Welcome back
+            Welcome back, {firstName}
           </h1>
         </div>
 
         {/* Right side - Notifications and user menu */}
         <div className="flex items-center gap-3">
-          {/* Notifications */}
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
-                <Badge 
-                  variant="destructive" 
+                 <Badge
+                  variant="destructive"
                   className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                 >
                   3
-                </Badge>
+                </Badge> 
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
@@ -73,16 +86,16 @@ export function DashboardTopBar() {
                 </Button>
               </div>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
 
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src="/placeholder.svg" alt="User" />
+                  {/* <AvatarImage src="/placeholder.svg" alt="User" /> */}
                   <AvatarFallback className="bg-primary text-primary-foreground">
-                    JD
+                    {userInitials}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -90,14 +103,14 @@ export function DashboardTopBar() {
             <DropdownMenuContent align="end" className="w-56">
               <div className="flex items-center gap-2 px-2 py-2">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src="/placeholder.svg" alt="User" />
+                  {/* <AvatarImage src="/placeholder.svg" alt="User" /> */}
                   <AvatarFallback className="bg-primary text-primary-foreground">
-                    JD
+                    {userInitials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <p className="text-sm font-medium">John Doe</p>
-                  <p className="text-xs text-muted-foreground">john@example.com</p>
+                  <p className="text-sm font-medium">{user?.fullName || "Guest User"}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email || ""}</p>
                 </div>
               </div>
               <DropdownMenuSeparator />

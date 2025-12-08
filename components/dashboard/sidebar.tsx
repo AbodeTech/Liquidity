@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LayoutDashboard, FileText, PlusCircle, CreditCard, FolderOpen, Bell, Settings } from "lucide-react"
+import { useUserProfile } from "@/lib/store/userProfile"
 
 const allNavItems = [
   {
@@ -22,21 +23,21 @@ const allNavItems = [
     href: "/dashboard/apply",
     icon: PlusCircle,
   },
-  {
-    title: "Payments",
-    href: "/dashboard/payments",
-    icon: CreditCard,
-  },
-  {
-    title: "Documents",
-    href: "/dashboard/documents",
-    icon: FolderOpen,
-  },
-  {
-    title: "Notifications",
-    href: "/dashboard/notifications",
-    icon: Bell,
-  },
+  // {
+  //   title: "Payments",
+  //   href: "/dashboard/payments",
+  //   icon: CreditCard,
+  // },
+  // {
+  //   title: "Documents",
+  //   href: "/dashboard/documents",
+  //   icon: FolderOpen,
+  // },
+  // {
+  //   title: "Notifications",
+  //   href: "/dashboard/notifications",
+  //   icon: Bell,
+  // },
   {
     title: "Settings",
     href: "/dashboard/settings",
@@ -46,6 +47,16 @@ const allNavItems = [
 
 export function DashboardSidebar() {
   const pathname = usePathname()
+  const { user } = useUserProfile()
+
+  const getInitials = (name: string) => {
+    if (!name) return "JD"
+    const parts = name.split(" ")
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase()
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+  }
+
+  const userInitials = getInitials(user?.fullName || "")
 
   return (
     <aside className="hidden lg:flex fixed top-0 left-0 z-50 h-screen w-64 bg-sidebar border-r border-sidebar-border">
@@ -83,12 +94,14 @@ export function DashboardSidebar() {
         <div className="p-4 border-t border-sidebar-border">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src="/placeholder.svg" alt="User" />
-              <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground">JD</AvatarFallback>
+              {/* <AvatarImage src="/placeholder.svg" alt="User" /> */}
+              <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground">
+                {userInitials}
+              </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">John Doe</p>
-              <p className="text-xs text-sidebar-foreground/60 truncate">john@example.com</p>
+              <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.fullName || "Guest User"}</p>
+              <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email || ""}</p>
             </div>
           </div>
         </div>

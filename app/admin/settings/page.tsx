@@ -22,6 +22,9 @@ import {
 import { UserPlus, Trash2, Mail } from "lucide-react"
 import { toast } from "sonner"
 
+import { useMutation } from "@tanstack/react-query"
+import { adminAuthService } from "@/lib/services/admin/authService"
+
 // Mock data
 const admins = [
   {
@@ -50,21 +53,49 @@ const admins = [
   },
 ]
 
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+
+const inviteSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+})
+
+type InviteFormValues = z.infer<typeof inviteSchema>
+
 export default function AdminSettingsPage() {
-  const [inviteEmail, setInviteEmail] = useState("")
-  const [isInviting, setIsInviting] = useState(false)
   const [adminToRemove, setAdminToRemove] = useState<string | null>(null)
 
-  const handleInvite = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsInviting(true)
+  const form = useForm<InviteFormValues>({
+    resolver: zodResolver(inviteSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+    },
+  })
 
-    // Mock invite - UI only
-    setTimeout(() => {
-      setIsInviting(false)
-      toast.success(`Invitation sent to ${inviteEmail}`)
-      setInviteEmail("")
-    }, 1000)
+  const inviteMutation = useMutation({
+    mutationFn: adminAuthService.inviteUser,
+    onSuccess: (_, variables) => {
+      toast.success(`Invitation sent to ${variables.email}`)
+      form.reset()
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to send invitation")
+    },
+  })
+
+  const onSubmit = (data: InviteFormValues) => {
+    inviteMutation.mutate(data)
   }
 
   const handleRemoveAdmin = (adminId: string) => {
@@ -92,30 +123,45 @@ export default function AdminSettingsPage() {
             <CardDescription>Send an invitation to add a new administrator to the platform</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleInvite} className="flex gap-3">
-              <div className="flex-1">
-                <Label htmlFor="invite-email" className="sr-only">
-                  Email address
-                </Label>
-                <Input
-                  id="invite-email"
-                  type="email"
-                  placeholder="admin@example.com"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  required
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col sm:flex-row gap-3 items-start">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="flex-1 w-full">
+                      <Label className="sr-only">Name</Label>
+                      <FormControl>
+                        <Input placeholder="Admin Name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              <Button type="submit" disabled={isInviting} className="gap-2">
-                <Mail className="h-4 w-4" />
-                {isInviting ? "Sending..." : "Send Invitation"}
-              </Button>
-            </form>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="flex-1 w-full">
+                      <Label className="sr-only">Email address</Label>
+                      <FormControl>
+                        <Input placeholder="admin@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" disabled={inviteMutation.isPending} className="gap-2 mt-0">
+                  <Mail className="h-4 w-4" />
+                  {inviteMutation.isPending ? "Sending..." : "Send Invitation"}
+                </Button>
+              </form>
+            </Form>
           </CardContent>
         </Card>
 
         {/* Active Admins */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Active Administrators</CardTitle>
             <CardDescription>Manage existing admin users</CardDescription>
@@ -157,10 +203,10 @@ export default function AdminSettingsPage() {
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Your Account */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Your Account</CardTitle>
             <CardDescription>Manage your admin account settings</CardDescription>
@@ -172,11 +218,11 @@ export default function AdminSettingsPage() {
             </div>
             <Button variant="outline">Change Password</Button>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Remove Admin Confirmation Dialog */}
-      <AlertDialog open={!!adminToRemove} onOpenChange={() => setAdminToRemove(null)}>
+      {/* <AlertDialog open={!!adminToRemove} onOpenChange={() => setAdminToRemove(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Administrator</AlertDialogTitle>
@@ -195,7 +241,7 @@ export default function AdminSettingsPage() {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+      </AlertDialog> */}
     </AdminLayout>
   )
 }

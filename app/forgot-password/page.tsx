@@ -5,49 +5,66 @@ import type React from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import Link from "next/link"
 import { useState } from "react"
 import { Loader2, Mail, ArrowLeft, CheckCircle2 } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { useMutation } from "@tanstack/react-query"
+import { userAuthService } from "@/lib/services/user/authService"
+import { toast } from "sonner"
+
+const forgotPasswordSchema = z.object({
+  email: z.string().email({ message: "Invalid email format" }),
+})
+
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>
 
 export default function ForgotPasswordPage() {
-  const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [email, setEmail] = useState("")
-  const [error, setError] = useState("")
+  const [submittedEmail, setSubmittedEmail] = useState("")
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
+  const form = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  })
+
+  const forgotPasswordMutation = useMutation({
+    mutationFn: userAuthService.forgotPassword,
+    onSuccess: () => {
+      setSuccess(true)
+      toast.success("Reset link sent successfully")
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Failed to send reset link. Please try again."
+      toast.error(message)
+    },
+  })
+
+  // Re-send mutation can theoretically use the same service, 
+  // but if we want to differentiate UI or logic, we can wrap it or just reuse.
+  // For now, re-using handling.
+
+  const onSubmit = (data: ForgotPasswordFormData) => {
+    setSubmittedEmail(data.email)
+    forgotPasswordMutation.mutate(data)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-
-    if (!email.trim()) {
-      setError("Email is required")
-      return
+  const handleResend = () => {
+    if (submittedEmail) {
+      forgotPasswordMutation.mutate({ email: submittedEmail })
     }
-
-    if (!validateEmail(email)) {
-      setError("Invalid email format")
-      return
-    }
-
-    setLoading(true)
-
-    // Mock API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    setLoading(false)
-    setSuccess(true)
-  }
-
-  const handleResend = async () => {
-    setLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setLoading(false)
   }
 
   if (success) {
@@ -80,7 +97,7 @@ export default function ForgotPasswordPage() {
               <CardDescription>
                 We&apos;ve sent password reset instructions to
                 <br />
-                <span className="font-medium text-foreground">{email}</span>
+                <span className="font-medium text-foreground">{submittedEmail}</span>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -95,10 +112,11 @@ export default function ForgotPasswordPage() {
               <div className="text-center">
                 <button
                   onClick={handleResend}
-                  disabled={loading}
+                  disabled={forgotPasswordMutation.isPending}
                   className="text-sm text-primary hover:underline font-medium disabled:opacity-50"
+                  type="button"
                 >
-                  {loading ? "Sending..." : "Didn't receive it? Resend"}
+                  {forgotPasswordMutation.isPending ? "Sending..." : "Didn't receive it? Resend"}
                 </button>
               </div>
             </CardContent>
@@ -141,36 +159,43 @@ export default function ForgotPasswordPage() {
             <CardDescription>Enter your email address and we&apos;ll send you a link to reset your password</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={error ? "border-red-500 pl-10" : "pl-10"}
-                  />
-                </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
-              </div>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                {/* Email */}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="you@example.com"
+                            className="pl-10"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Submit Button */}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  "Send Reset Link"
-                )}
-              </Button>
-            </form>
+                {/* Submit Button */}
+                <Button type="submit" className="w-full" disabled={forgotPasswordMutation.isPending}>
+                  {forgotPasswordMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Send Reset Link"
+                  )}
+                </Button>
+              </form>
+            </Form>
 
             <p className="text-center text-sm text-muted-foreground">
               Remember your password?{" "}

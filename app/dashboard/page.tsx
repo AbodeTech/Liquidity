@@ -4,55 +4,49 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { FileText, PlusCircle, LogOut, User } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { FileText, PlusCircle, LogOut, User, ArrowRight, Wallet, History, Bell, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { useUserProfile } from "@/lib/store/userProfile"
+import { auth } from "@/lib/auth"
 
 export default function DashboardPage() {
   const router = useRouter()
-  const [userName, setUserName] = useState("")
+  // const [userName, setUserName] = useState("") // Removed local state
+  const { user, clearUser } = useUserProfile()
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Check if user is logged in
-    const isLoggedIn = localStorage.getItem("isLoggedIn")
-    if (!isLoggedIn) {
+    const token = auth.getToken()
+    if (!token) {
       router.push("/login")
       return
     }
-
-    const name = localStorage.getItem("userName") || "User"
-    setUserName(name)
+    setLoading(false)
   }, [router])
 
+
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn")
-    localStorage.removeItem("userEmail")
-    localStorage.removeItem("userName")
-    router.push("/")
+    auth.removeToken()
+    clearUser()
+    router.push("/login")
   }
 
-  return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="bg-background border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-foreground">
-            Liquidity
-          </Link>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <User className="h-4 w-4" />
-              <span>{userName}</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
+  const userName = user?.fullName || "User"
+
+  return (
+    <div className="min-h-screen ">
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto pb-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">Welcome back, {userName.split(" ")[0]}!</h1>
           <p className="text-muted-foreground mt-1">What would you like to do today?</p>
@@ -71,7 +65,7 @@ export default function DashboardPage() {
                   Start a new loan application, continue saved drafts, or manage your applications in progress.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <Button className="w-full">Start Application</Button>
               </CardContent>
             </Link>
@@ -89,7 +83,7 @@ export default function DashboardPage() {
                   View the status of your submitted applications, track approvals, and manage your loans.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <Button variant="outline" className="w-full bg-transparent">
                   View Applications
                 </Button>

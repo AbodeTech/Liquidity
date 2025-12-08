@@ -31,7 +31,7 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
 
   const handlePayment = () => {
     // Navigate to payment page or show payment modal
-    router.push(`/dashboard/payments/process?app=${application.id}`)
+    router.push(`/dashboard/payments/process?app=${application._id}`)
   }
 
   return (
@@ -40,8 +40,8 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div>
-              <DialogTitle className="text-2xl">{application.id}</DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">{application.loanType}</p>
+              <DialogTitle className="text-2xl">{application._id}</DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">{application.loanDetails?.loanPurpose}</p>
             </div>
             <Badge variant="outline" className={statusConfig[application.status as keyof typeof statusConfig]?.className}>
               {statusConfig[application.status as keyof typeof statusConfig]?.label}
@@ -68,12 +68,12 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">20% Deposit:</span>
-                        <span className="font-medium">₦{(application.amount * 0.2).toLocaleString()}</span>
+                        <span className="font-medium">₦{(application.loanDetails?.loanAmount * 0.2).toLocaleString()}</span>
                       </div>
                       <Separator />
                       <div className="flex justify-between">
                         <span className="font-semibold">Total Due:</span>
-                        <span className="font-bold text-lg">₦{(5000 + application.amount * 0.2).toLocaleString()}</span>
+                        <span className="font-bold text-lg">₦{(5000 + application.loanDetails?.loanAmount * 0.2).toLocaleString()}</span>
                       </div>
                     </div>
                     <Button className="w-full mt-4" onClick={handlePayment}>
@@ -220,11 +220,11 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-muted-foreground">Loan Type</p>
-                  <p className="font-medium mt-1">{application.loanType}</p>
+                  <p className="font-medium mt-1">{application.loanDetails?.loanPurpose}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Amount Requested</p>
-                  <p className="font-medium mt-1">₦{application.amount.toLocaleString()}</p>
+                  <p className="font-medium mt-1">₦{application.loanDetails?.loanAmount.toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Application Date</p>
@@ -232,7 +232,7 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
                 </div>
                 <div>
                   <p className="text-muted-foreground">Tenure</p>
-                  <p className="font-medium mt-1">{application.tenure} months</p>
+                  <p className="font-medium mt-1">{application.loanDetails?.repaymentPeriod} months</p>
                 </div>
                 {application.monthlyPayment && (
                   <div>
@@ -268,18 +268,18 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
                 </div>
                 <div>
                   <p className="text-muted-foreground">Employment Status</p>
-                  <p className="font-medium mt-1">{application.personalInfo.employment}</p>
+                  <p className="font-medium mt-1">{application.employment?.employmentStatus}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Monthly Income</p>
-                  <p className="font-medium mt-1">₦{application.personalInfo.monthlyIncome.toLocaleString()}</p>
+                  <p className="font-medium mt-1">₦{application.employment?.monthlyIncome?.toLocaleString()}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Rent/Land Specific Details */}
-          {application.rentDetails && (
+          {application.loanDetails?.loanPurpose === "Rent Loan" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -290,31 +290,31 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
               <CardContent className="space-y-3 text-sm">
                 <div>
                   <p className="text-muted-foreground">Property Address</p>
-                  <p className="font-medium mt-1">{application.rentDetails.propertyAddress}</p>
+                  <p className="font-medium mt-1">{application.loanDetails.propertyAddress}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-muted-foreground">Landlord Name</p>
-                    <p className="font-medium mt-1">{application.rentDetails.landlordName}</p>
+                    <p className="font-medium mt-1">{application.loanDetails.landlordName}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Landlord Contact</p>
-                    <p className="font-medium mt-1">{application.rentDetails.landlordContact}</p>
+                    <p className="font-medium mt-1">{application.loanDetails.landlordPhone}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Rent Amount</p>
-                    <p className="font-medium mt-1">₦{application.rentDetails.rentAmount.toLocaleString()}</p>
+                    <p className="text-muted-foreground">Monthly Rent</p>
+                    <p className="font-medium mt-1">₦{application.loanDetails.monthlyRent?.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Rent Duration</p>
-                    <p className="font-medium mt-1">{application.rentDetails.rentDuration} months</p>
+                    <p className="font-medium mt-1">{application.loanDetails.repaymentPeriod} months</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {application.landDetails && (
+          {application.loanDetails?.loanPurpose === "Land Loan" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -326,24 +326,17 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-muted-foreground">Land Location</p>
-                    <p className="font-medium mt-1">{application.landDetails.landLocation}</p>
+                    <p className="font-medium mt-1">{application.loanDetails.propertyAddress}</p>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Land Size</p>
-                    <p className="font-medium mt-1">{application.landDetails.landSize}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Land Cost</p>
-                    <p className="font-medium mt-1">₦{application.landDetails.landCost.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Developer Name</p>
-                    <p className="font-medium mt-1">{application.landDetails.developerName}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Developer Contact</p>
-                    <p className="font-medium mt-1">{application.landDetails.developerContact}</p>
-                  </div>
+                  {/* Additional fields map to loanDetails properties if available in API response for Land Loans */}
+                  {/* Assuming propertyAddress covers location. Developer details might be in loanDetails as well? */}
+                  {/* Based on previous land page logic, developer details were omitted, but if present they'd be in loanDetails */}
+                  {application.loanDetails.developerName && (
+                    <div>
+                      <p className="text-muted-foreground">Developer Name</p>
+                      <p className="font-medium mt-1">{application.loanDetails.developerName}</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -396,7 +389,7 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
                       <FileText className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">{doc.name}</span>
+                      <span className="text-sm font-medium">{doc.documentType}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className={
