@@ -51,6 +51,7 @@ export default function ApplicationsPage() {
     if (debouncedSearch !== search) {
       updateFilters("search", debouncedSearch)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch])
 
   // Fetch applications
@@ -76,6 +77,7 @@ export default function ApplicationsPage() {
       case "rejected": return "bg-red-500/10 text-red-700 hover:bg-red-500/20"
       case "under_review": return "bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"
       case "submitted": return "bg-blue-500/10 text-blue-700 hover:bg-blue-500/20"
+      case "draft": return "bg-slate-500/10 text-slate-700 hover:bg-slate-500/20"
       default: return "bg-slate-500/10 text-slate-700 hover:bg-slate-500/20"
     }
   }
@@ -181,11 +183,11 @@ export default function ApplicationsPage() {
                               </td>
                               <td className="p-4">
                                 <Badge variant="outline" className="text-xs capitalize">
-                                  {app.loanDetails.loanPurpose}
+                                  {app.loanPurpose}
                                 </Badge>
                               </td>
                               <td className="p-4 font-medium text-sm">
-                                {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(app.loanDetails.loanAmount)}
+                                {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(app.rentLoanDetails?.desiredLoanAmount || app.landLoanDetails?.desiredLoanAmount || 0)}
                               </td>
                               <td className="p-4 text-sm text-muted-foreground">
                                 {app.submittedAt ? format(new Date(app.submittedAt), 'MMM dd, yyyy') : 'N/A'}
@@ -247,10 +249,10 @@ export default function ApplicationsPage() {
                         <div className="flex items-center justify-between pt-2 border-t">
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className="text-xs capitalize">
-                              {app.loanDetails.loanPurpose}
+                              {app.loanPurpose}
                             </Badge>
                             <span className="font-medium text-sm">
-                              {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(app.loanDetails.loanAmount)}
+                              {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(app.rentLoanDetails?.desiredLoanAmount || app.landLoanDetails?.desiredLoanAmount || 0)}
                             </span>
                           </div>
                           <Link href={`/admin/applications/${app._id}`}>

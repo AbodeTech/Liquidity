@@ -1,4 +1,4 @@
-import { Employment, LoanDetails, PersonalInfo } from "../admin/application";
+import { Employment, LandLoanDetails, PersonalInfo, RentLoanDetails } from "../admin/application";
 
 
 
@@ -7,7 +7,9 @@ export interface ApplicationRequestType {
   draftId?: string
   personalInfo: PersonalInfo
   employment: Employment
-  loanDetails: LoanDetails
+  loanPurpose: "rent" | "land"
+  rentLoanDetails?: RentLoanDetails
+  landLoanDetails?: LandLoanDetails
   documents: Document[]
 }
 
@@ -26,7 +28,9 @@ export interface ApplicationSaveDraftRequestType {
   currentStep: string
   personalInfo?: PersonalInfo
   employment?: Employment
-  loanDetails?: LoanDetails
+  loanPurpose?: "rent" | "land"
+  rentLoanDetails?: RentLoanDetails
+  landLoanDetails?: LandLoanDetails
   documents?: Document[]
 }
 

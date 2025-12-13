@@ -14,14 +14,16 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft, ArrowRight, Save, CheckCircle, Loader2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from "next/link"
 import { FormProgress } from "@/components/dashboard/form-progress"
 import { FileUpload } from "@/components/dashboard/file-upload"
 import { toast } from "sonner"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { applicationService } from "@/lib/services/user/applicationService"
 import { ApplicationSaveDraftRequestType } from "@/lib/types/user/application"
+import { useUserProfile } from "@/lib/store/userProfile"
 
 
 const requiredDocuments = [
@@ -32,11 +34,23 @@ const requiredDocuments = [
   { key: "bankStatement", label: "Statement of Account (Last 6 months)" },
 ]
 
+const formatNumber = (value: string) => {
+  // Remove non-digit characters
+  const number = value.replace(/[^\d]/g, "")
+  // Format with commas
+  return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+
+const cleanNumber = (value: string) => {
+  return value.replace(/[^\d]/g, "")
+}
+
 export default function LandLoanPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const draftId = searchParams.get("draftId") || searchParams.get("draft")
   const queryClient = useQueryClient()
+  const { user } = useUserProfile()
 
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -46,12 +60,13 @@ export default function LandLoanPage() {
   const [formData, setFormData] = useState({
     // Step 1: Personal Information
     fullName: "",
-    email: "",
+    email: user?.email || "",
     phone: "",
     dateOfBirth: "",
     gender: "",
     maritalStatus: "",
     dependents: "",
+
 
     // Step 2: Employment Information
     employmentStatus: "",
@@ -97,6 +112,13 @@ export default function LandLoanPage() {
     enabled: !!draftId,
   })
 
+  // Pre-fill email from user profile
+  useEffect(() => {
+    if (user?.email && formData.email !== user.email) {
+      setFormData(prev => ({ ...prev, email: user.email }))
+    }
+  }, [user, formData.email])
+
   // Populate form with draft data
   useEffect(() => {
     if (draftData?.data) {
@@ -105,12 +127,26 @@ export default function LandLoanPage() {
         ...prev,
         ...draft.personalInfo,
         ...draft.employment,
-        ...draft.loanDetails,
-        // Map specific fields back
-        landLocation: draft.loanDetails?.propertyAddress || "",
-        repaymentPeriod: draft.loanDetails?.repaymentPeriod?.toString() || "",
+        monthlyIncome: formatNumber(draft.employment?.monthlyIncome?.toString() || ""),
+        ...draft.landLoanDetails,
+        // Map nested objects back to flat state
+        loanAmount: formatNumber(draft.landLoanDetails?.desiredLoanAmount?.toString() || ""),
+        landCost: formatNumber(draft.landLoanDetails?.totalLandCost?.toString() || ""),
+        landLocation: draft.landLoanDetails?.landLocation || "",
+        landSize: draft.landLoanDetails?.landSize || "",
+        purchaseTimeline: draft.landLoanDetails?.purchaseTimeline || "",
+        repaymentStartDate: draft.landLoanDetails?.preferredRepaymentStartDate || "",
+
+        developerName: draft.landLoanDetails?.developerSellerInfo?.developerSellerName || "",
+        developerPhone: draft.landLoanDetails?.developerSellerInfo?.developerSellerPhone || "",
+        developerEmail: draft.landLoanDetails?.developerSellerInfo?.developerSellerEmail || "",
+
+        developerAccountNumber: draft.landLoanDetails?.developerSellerBankDetails?.developerSellerAccountNumber || "",
+        developerBankName: draft.landLoanDetails?.developerSellerBankDetails?.developerSellerBankName || "",
+        developerAccountName: draft.landLoanDetails?.developerSellerBankDetails?.developerSellerAccountName || "",
         // Other fields handled by spread ...draft.loanDetails if they match key names
         currentStep: parseInt(draft.currentStep || "1"),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         documents: draft.documents?.reduce((acc: Record<string, any>, doc: any) => ({
           ...acc,
           [doc.documentType]: doc
@@ -134,33 +170,36 @@ export default function LandLoanPage() {
         gender: data.gender,
         maritalStatus: data.maritalStatus,
         numberOfDependents: Number(data.dependents || 0),
+        nin: data.nin,
+        bvn: data.bvn,
       },
       employment: {
         employmentStatus: data.employmentStatus,
         employer: data.employerName,
         jobTitle: data.jobTitle,
-        monthlyIncome: data.monthlyIncome ? Number(data.monthlyIncome) : 0,
+        monthlyIncome: data.monthlyIncome ? Number(cleanNumber(data.monthlyIncome)) : 0,
         yearsEmployed: Number(data.yearsEmployed || 0),
         officeAddress: data.workAddress,
         employerPhone: data.officePhone,
       },
-      loanDetails: {
-        loanAmount: Number(data.loanAmount || 0),
-        loanPurpose: "Land Loan",
-        propertyAddress: data.landLocation, // Mapping landLocation
-
-        // landCost, landSize, purchaseTimeline, developerName, developerPhone omitted as per API requirements
-        // landCost: Number(data.landCost || 0),
-        // landSize: Number(data.landSize || 0),
-        // purchaseTimeline: data.purchaseTimeline,
-
-        // developerName: data.developerName,
-        // developerPhone: data.developerPhone,
-        // developerEmail, developerAccountName, developerBankName, developerAccountNumber omitted
-
-        // developerEmail, developerAccountName, developerBankName, developerAccountNumber omitted
-        repaymentPeriod: Number(data.repaymentPeriod || 12), // Default to 12 if empty, but should be required
-        preferredRepaymentDate: data.repaymentStartDate,
+      loanPurpose: "land",
+      landLoanDetails: {
+        desiredLoanAmount: Number(cleanNumber(data.loanAmount || "0")),
+        totalLandCost: Number(cleanNumber(data.landCost || "0")),
+        landSize: data.landSize,
+        purchaseTimeline: data.purchaseTimeline,
+        preferredRepaymentStartDate: data.repaymentStartDate,
+        landLocation: data.landLocation,
+        developerSellerInfo: {
+          developerSellerName: data.developerName,
+          developerSellerPhone: data.developerPhone,
+          developerSellerEmail: data.developerEmail,
+        },
+        developerSellerBankDetails: {
+          developerSellerAccountNumber: data.developerAccountNumber,
+          developerSellerBankName: data.developerBankName,
+          developerSellerAccountName: data.developerAccountName,
+        }
       },
       documents: documentsArray
     }
@@ -234,8 +273,17 @@ export default function LandLoanPage() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    let finalValue = value
+
+    // Format amount fields
+    if (["monthlyIncome", "loanAmount", "landCost"].includes(field)) {
+      finalValue = formatNumber(value)
+    }
+
+    setFormData(prev => ({ ...prev, [field]: finalValue }))
   }
+
+
 
   const handleSaveDraft = () => {
     saveDraftMutation.mutate(getPayloadFromData(formData))
@@ -259,13 +307,15 @@ export default function LandLoanPage() {
     const basePayload = getPayloadFromData(formData)
 
     // Create submission payload without currentStep
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { currentStep, ...submissionPayload } = basePayload
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const payload = {
       ...submissionPayload,
       draftId: draftId || undefined
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
 
     submitApplicationMutation.mutate(payload)
@@ -293,9 +343,9 @@ export default function LandLoanPage() {
       {/* Navigation */}
       <nav className="border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <a href="/" className="text-2xl font-bold text-foreground">
+          <Link href="/" className="text-2xl font-bold text-foreground">
             Liquidity
-          </a>
+          </Link>
           <Button variant="outline" onClick={() => router.push("/dashboard/apply")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Loan Types
@@ -339,6 +389,8 @@ export default function LandLoanPage() {
                         value={formData.email}
                         onChange={(e) => handleInputChange("email", e.target.value)}
                         placeholder="your.email@example.com"
+                        disabled
+                        className="bg-muted text-muted-foreground"
                       />
                     </div>
 

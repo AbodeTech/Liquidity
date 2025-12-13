@@ -4,8 +4,8 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, PlusCircle, LogOut, User, ArrowRight, Wallet, History, Bell, Loader2 } from "lucide-react"
+
+import { FileText, PlusCircle, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useUserProfile } from "@/lib/store/userProfile"
 import { auth } from "@/lib/auth"
@@ -13,7 +13,7 @@ import { auth } from "@/lib/auth"
 export default function DashboardPage() {
   const router = useRouter()
   // const [userName, setUserName] = useState("") // Removed local state
-  const { user, clearUser } = useUserProfile()
+  const { user } = useUserProfile()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -27,11 +27,7 @@ export default function DashboardPage() {
   }, [router])
 
 
-  const handleLogout = () => {
-    auth.removeToken()
-    clearUser()
-    router.push("/login")
-  }
+
 
   if (loading) {
     return (

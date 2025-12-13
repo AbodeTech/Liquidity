@@ -45,7 +45,7 @@ export function OTPInput({ value, onChange, disabled }: OTPInputProps) {
     e.preventDefault()
     const pastedData = e.clipboardData.getData('text').slice(0, 6).replace(/\D/g, '')
     onChange(pastedData)
-    
+
     // Focus the next empty input or last input
     const nextIndex = Math.min(pastedData.length, 5)
     inputRefs.current[nextIndex]?.focus()
@@ -56,7 +56,7 @@ export function OTPInput({ value, onChange, disabled }: OTPInputProps) {
       {[0, 1, 2, 3, 4, 5].map((index) => (
         <Input
           key={index}
-          ref={(el) => (inputRefs.current[index] = el)}
+          ref={(el) => { if (el) inputRefs.current[index] = el }}
           type="text"
           inputMode="numeric"
           maxLength={1}

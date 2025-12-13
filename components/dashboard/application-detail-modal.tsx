@@ -5,8 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { CheckCircle2, Download, AlertCircle, FileText, CreditCard, Clock, User, Home, MapPin } from 'lucide-react'
-import { StatusTimeline } from "./status-timeline"
+import { CheckCircle2, Download, AlertCircle, FileText, CreditCard, User, Home, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface ApplicationDetailModalProps {
@@ -41,7 +40,7 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-2xl">{application._id}</DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">{application.loanDetails?.loanPurpose}</p>
+              <p className="text-sm text-muted-foreground mt-1">{application.loanPurpose}</p>
             </div>
             <Badge variant="outline" className={statusConfig[application.status as keyof typeof statusConfig]?.className}>
               {statusConfig[application.status as keyof typeof statusConfig]?.label}
@@ -220,19 +219,19 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-muted-foreground">Loan Type</p>
-                  <p className="font-medium mt-1">{application.loanDetails?.loanPurpose}</p>
+                  <p className="font-medium mt-1">{application.loanPurpose === "rent" ? "Rent Loan" : application.loanPurpose === "land" ? "Land Loan" : "Loan"}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Amount Requested</p>
-                  <p className="font-medium mt-1">₦{application.loanDetails?.loanAmount.toLocaleString()}</p>
+                  <p className="font-medium mt-1">₦{(application.rentLoanDetails?.desiredLoanAmount || application.landLoanDetails?.desiredLoanAmount || 0).toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Application Date</p>
-                  <p className="font-medium mt-1">{new Date(application.date).toLocaleDateString()}</p>
+                  <p className="font-medium mt-1">{new Date(application.date || application.createdAt).toLocaleDateString()}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Tenure</p>
-                  <p className="font-medium mt-1">{application.loanDetails?.repaymentPeriod} months</p>
+                  <p className="font-medium mt-1">{application.rentLoanDetails?.rentDuration || application.landLoanDetails?.repaymentPeriod || 0} months</p>
                 </div>
                 {application.monthlyPayment && (
                   <div>
@@ -279,7 +278,7 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
           </Card>
 
           {/* Rent/Land Specific Details */}
-          {application.loanDetails?.loanPurpose === "Rent Loan" && (
+          {(application.loanPurpose === "rent" || application.rentLoanDetails) && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -290,31 +289,31 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
               <CardContent className="space-y-3 text-sm">
                 <div>
                   <p className="text-muted-foreground">Property Address</p>
-                  <p className="font-medium mt-1">{application.loanDetails.propertyAddress}</p>
+                  <p className="font-medium mt-1">{application.rentLoanDetails?.propertyAddress}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-muted-foreground">Landlord Name</p>
-                    <p className="font-medium mt-1">{application.loanDetails.landlordName}</p>
+                    <p className="font-medium mt-1">{application.rentLoanDetails?.landlordInfo?.landlordFullName}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Landlord Contact</p>
-                    <p className="font-medium mt-1">{application.loanDetails.landlordPhone}</p>
+                    <p className="font-medium mt-1">{application.rentLoanDetails?.landlordInfo?.landlordPhoneNumber}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Monthly Rent</p>
-                    <p className="font-medium mt-1">₦{application.loanDetails.monthlyRent?.toLocaleString()}</p>
+                    <p className="font-medium mt-1">₦{(application.rentLoanDetails?.annualRentAmount / 12)?.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Rent Duration</p>
-                    <p className="font-medium mt-1">{application.loanDetails.repaymentPeriod} months</p>
+                    <p className="font-medium mt-1">{application.rentLoanDetails?.rentDuration} months</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {application.loanDetails?.loanPurpose === "Land Loan" && (
+          {(application.loanPurpose === "land" || application.landLoanDetails) && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -326,17 +325,22 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-muted-foreground">Land Location</p>
-                    <p className="font-medium mt-1">{application.loanDetails.propertyAddress}</p>
+                    <p className="font-medium mt-1">{application.landLoanDetails?.landLocation}</p>
                   </div>
-                  {/* Additional fields map to loanDetails properties if available in API response for Land Loans */}
-                  {/* Assuming propertyAddress covers location. Developer details might be in loanDetails as well? */}
-                  {/* Based on previous land page logic, developer details were omitted, but if present they'd be in loanDetails */}
-                  {application.loanDetails.developerName && (
+                  {application.landLoanDetails?.developerSellerInfo?.developerSellerName && (
                     <div>
-                      <p className="text-muted-foreground">Developer Name</p>
-                      <p className="font-medium mt-1">{application.loanDetails.developerName}</p>
+                      <p className="text-muted-foreground">Developer/Seller Name</p>
+                      <p className="font-medium mt-1">{application.landLoanDetails.developerSellerInfo.developerSellerName}</p>
                     </div>
                   )}
+                  <div>
+                    <p className="text-muted-foreground">Total Land Cost</p>
+                    <p className="font-medium mt-1">₦{application.landLoanDetails?.totalLandCost?.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Land Size</p>
+                    <p className="font-medium mt-1">{application.landLoanDetails?.landSize} sqm</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -407,19 +411,6 @@ export function ApplicationDetailModal({ application, onClose }: ApplicationDeta
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Status Timeline */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                Application Timeline
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <StatusTimeline statusHistory={application.statusHistory} />
             </CardContent>
           </Card>
 

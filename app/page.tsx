@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { ArrowRight, Home, Clock, Shield, Calculator, CheckCircle, Building2, Landmark } from "lucide-react"
+import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useEffect } from "react"
 
@@ -36,11 +37,14 @@ export default function LandingPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="border-b border-border sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50"
+        className="border-b border-border sticky top-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50"
       >
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-foreground">
-            Liquidity
+          <Link href="/" className="flex items-center gap-2">
+            <div className="relative h-8 w-8">
+              <Image src="/Logo.svg" alt="Liquidity Logo" fill className="object-contain" />
+            </div>
+            <span className="text-2xl font-bold text-foreground">Liquidity</span>
           </Link>
           <div className="hidden md:flex items-center gap-6">
             <a
@@ -95,7 +99,7 @@ export default function LandingPage() {
               }}
             />
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
+          <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/60 to-black/40" />
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -171,7 +175,7 @@ export default function LandingPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.6 }}
-        className="bg-gradient-to-br from-muted/80 to-muted/40 py-12 relative overflow-hidden"
+        className="bg-linear-to-br from-muted/80 to-muted/40 py-12 relative overflow-hidden"
       >
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
@@ -264,22 +268,8 @@ export default function LandingPage() {
                     Get financing for your annual rent payment. We pay your landlord directly while you repay in
                     comfortable monthly installments.
                   </p>
-                  <ul className="space-y-3 mb-8">
-                    <li className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                      Up to ₦5,000,000
-                    </li>
-                    <li className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                      12 months repayment
-                    </li>
-                    <li className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                      Competitive interest rates
-                    </li>
-                  </ul>
                   <Button asChild className="w-full">
-                    <Link href="/apply/rent">Apply for Rent Loan</Link>
+                    <Link href="/dashboard/apply/rent">Apply for Rent Loan</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -302,22 +292,8 @@ export default function LandingPage() {
                     Finance your land purchase with flexible payment options. We work with verified developers to secure
                     your property.
                   </p>
-                  <ul className="space-y-3 mb-8">
-                    <li className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                      Up to ₦10,000,000
-                    </li>
-                    <li className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                      Up to 24 months repayment
-                    </li>
-                    <li className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                      Verified developers only
-                    </li>
-                  </ul>
                   <Button asChild className="w-full">
-                    <Link href="/apply/land">Apply for Land Loan</Link>
+                    <Link href="/dashboard/apply/land">Apply for Land Loan</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -386,11 +362,12 @@ export default function LandingPage() {
       >
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/95 to-accent z-10" />
-          <img
+          <div className="absolute inset-0 bg-linear-to-r from-primary via-primary/95 to-accent z-10" />
+          <Image
             src="/modern-nigerian-housing-estate-gated-community.jpg"
             alt="Nigerian Housing Estate"
-            className="w-full h-full object-cover opacity-20"
+            fill
+            className="object-cover opacity-20"
           />
         </div>
 

@@ -2,56 +2,19 @@
 
 import type React from "react"
 
-import { useState } from "react"
 import { AdminLayout } from "@/components/admin/admin-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { UserPlus, Trash2, Mail } from "lucide-react"
+
+import { UserPlus, Mail } from "lucide-react"
 import { toast } from "sonner"
 
 import { useMutation } from "@tanstack/react-query"
 import { adminAuthService } from "@/lib/services/admin/authService"
 
-// Mock data
-const admins = [
-  {
-    id: "1",
-    name: "Admin User",
-    email: "admin@liquidity.ng",
-    dateAdded: "2024-01-01",
-    status: "active",
-    isCurrentUser: true,
-  },
-  {
-    id: "2",
-    name: "John Doe",
-    email: "john@liquidity.ng",
-    dateAdded: "2024-01-10",
-    status: "active",
-    isCurrentUser: false,
-  },
-  {
-    id: "3",
-    name: "Jane Smith",
-    email: "jane@liquidity.ng",
-    dateAdded: "2024-01-12",
-    status: "active",
-    isCurrentUser: false,
-  },
-]
+
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -61,7 +24,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form"
 
@@ -73,7 +35,7 @@ const inviteSchema = z.object({
 type InviteFormValues = z.infer<typeof inviteSchema>
 
 export default function AdminSettingsPage() {
-  const [adminToRemove, setAdminToRemove] = useState<string | null>(null)
+
 
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(inviteSchema),
@@ -89,6 +51,7 @@ export default function AdminSettingsPage() {
       toast.success(`Invitation sent to ${variables.email}`)
       form.reset()
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to send invitation")
     },
@@ -98,11 +61,7 @@ export default function AdminSettingsPage() {
     inviteMutation.mutate(data)
   }
 
-  const handleRemoveAdmin = (adminId: string) => {
-    // Mock remove - UI only
-    toast.success("Admin removed successfully")
-    setAdminToRemove(null)
-  }
+
 
   return (
     <AdminLayout>

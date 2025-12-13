@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -13,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Building2, LayoutDashboard, FileText, Settings, LogOut, UserPlus } from "lucide-react"
+import { LayoutDashboard, FileText, Settings, LogOut, UserPlus } from "lucide-react"
 
 interface AdminLayoutProps {
   children: ReactNode
@@ -40,13 +41,20 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/60">
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-8">
             <Link href="/admin" className="flex items-center gap-2">
-              <Building2 className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold text-primary">Liquidity</span>
-              <span className="text-xs font-medium text-muted-foreground ml-2 px-2 py-1 bg-muted rounded">Admin</span>
+              <div className="relative h-8 w-32">
+                <Image
+                  src="/LIQUIDELogo.png"
+                  alt="Liquidity Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <span className="text-xs font-medium text-muted-foreground px-2 py-1 bg-muted rounded">Admin</span>
             </Link>
             <nav className="hidden md:flex items-center gap-1">
               {navigation.map((item) => {

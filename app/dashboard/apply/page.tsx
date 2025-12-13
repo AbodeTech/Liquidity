@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Home, MapPin, ArrowLeft, Pencil, Trash2, Clock, LogOut, User, Loader2 } from "lucide-react"
+import { Home, MapPin, ArrowLeft, Pencil, Trash2, Clock, Loader2 } from "lucide-react"
 import Link from "next/link"
 import {
   AlertDialog,
@@ -22,7 +22,7 @@ import { applicationService } from "@/lib/services/user/applicationService"
 import { toast } from "sonner"
 
 export default function DashboardApplyPage() {
-  const router = useRouter()
+
   // const [userName, setUserName] = useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [draftToDelete, setDraftToDelete] = useState<string | null>(null)
@@ -51,10 +51,7 @@ export default function DashboardApplyPage() {
     }
   })
 
-  const handleLogout = () => {
-    // Auth handled in parent
-    router.push("/login")
-  }
+
 
   const handleDeleteDraft = (id: string) => {
     setDraftToDelete(id)
@@ -100,11 +97,6 @@ export default function DashboardApplyPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Up to ₦5,000,000</li>
-                  <li>• 12 months repayment</li>
-                  <li>• Competitive rates</li>
-                </ul>
                 <Button asChild className="w-full">
                   <Link href="/dashboard/apply/rent">Apply Now</Link>
                 </Button>
@@ -121,11 +113,6 @@ export default function DashboardApplyPage() {
                 <CardDescription>Finance your land purchase with flexible payment options.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Up to ₦10,000,000</li>
-                  <li>• Up to 24 months repayment</li>
-                  <li>• Verified developers</li>
-                </ul>
                 <Button asChild className="w-full">
                   <Link href="/dashboard/apply/land">Apply Now</Link>
                 </Button>
@@ -155,7 +142,7 @@ export default function DashboardApplyPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-start gap-4">
                         <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center shrink-0">
-                          {draft.type === "Rent Loan" || draft.loanType === "Rent Loan" || !draft.loanType ? (
+                          {draft.loanPurpose === "rent" || draft.rentLoanDetails ? (
                             <Home className="h-5 w-5 text-muted-foreground" />
                           ) : (
                             <MapPin className="h-5 w-5 text-muted-foreground" />
@@ -163,13 +150,13 @@ export default function DashboardApplyPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold">{draft.type || draft.loanDetails?.loanType || "Rent Loan"}</h3>
+                            <h3 className="font-semibold">{draft.loanPurpose === "rent" ? "Rent Loan" : draft.loanPurpose === "land" ? "Land Loan" : draft.type || "Loan Application"}</h3>
                             <Badge variant="outline" className="text-xs">
                               Draft
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            ₦{Number(draft.amount || draft.loanDetails?.loanAmount || 0).toLocaleString()} • Step {draft.currentStep || draft.step || 1} of 5
+                            ₦{Number(draft.rentLoanDetails?.desiredLoanAmount || draft.landLoanDetails?.desiredLoanAmount || draft.amount || 0).toLocaleString()} • Step {draft.currentStep || draft.step || 1} of 5
                           </p>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                             <Clock className="h-3 w-3" />
@@ -180,7 +167,7 @@ export default function DashboardApplyPage() {
                       <div className="flex items-center gap-2 sm:shrink-0">
                         <Button variant="outline" size="sm" asChild>
                           <Link
-                            href={`/dashboard/apply/${(draft.type === "Rent Loan" || draft.loanType === "Rent Loan" || !draft.loanType) ? "rent" : "land"}?draft=${draft._id}`}
+                            href={`/dashboard/apply/${(draft.loanPurpose === "rent" || draft.rentLoanDetails) ? "rent" : "land"}?draft=${draft._id}`}
                           >
                             <Pencil className="h-4 w-4 mr-1" />
                             Continue

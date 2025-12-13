@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, CheckCircle2, XCircle, Clock } from "lucide-react"
 import { DashboardOverviewResponse } from "@/lib/types/admin/dashboard"
-import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts"
+import { BarChart, Bar, ResponsiveContainer, Tooltip } from "recharts"
 
 interface OverviewCardsProps {
   overview: DashboardOverviewResponse['overview']

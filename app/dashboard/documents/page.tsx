@@ -209,7 +209,7 @@ export default function DocumentsPage() {
 
       {/* Document Viewer Modal */}
       <DocumentViewerModal
-        open={viewerModalOpen}
+        isOpen={viewerModalOpen}
         document={selectedDocument}
         onClose={() => setViewerModalOpen(false)}
       />

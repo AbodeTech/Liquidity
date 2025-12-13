@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Loader2, Eye, EyeOff } from "lucide-react"
@@ -73,6 +74,7 @@ export default function RegisterPage() {
         router.push("/login")
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const message = error.response?.data?.message || "Registration failed. Please try again."
       toast.error(message)
@@ -103,8 +105,16 @@ export default function RegisterPage() {
       <div className="w-full max-w-md relative z-10 my-8">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold text-white">
-            Liquidity
+          <Link href="/" className="inline-block">
+            <div className="relative h-12 w-48">
+              <Image
+                src="/LIQUIDELogo.png"
+                alt="Liquidity Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           </Link>
         </div>
 

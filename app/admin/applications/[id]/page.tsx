@@ -13,12 +13,20 @@ import { adminApplicationService } from "@/lib/services/admin/applicationService
 import { Application, ApplicationStatus } from "@/lib/types/admin/application"
 import { format } from "date-fns"
 import { toast } from "sonner"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
+import DocumentViewer from "@/components/admin/dashboard/DocumentViewer"
 
 export default function ApplicationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const [status, setStatus] = useState<ApplicationStatus | "">("")
   const [viewingDocument, setViewingDocument] = useState<{ url: string; type: string; name: string } | null>(null)
+
+  // Modal states
+  const [approveModalOpen, setApproveModalOpen] = useState(false)
+  const [rejectModalOpen, setRejectModalOpen] = useState(false)
+  const [actionNote, setActionNote] = useState("")
+
   const queryClient = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
@@ -41,10 +49,12 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
   })
 
   const approveMutation = useMutation({
-    mutationFn: () => adminApplicationService.approveApplication(id),
+    mutationFn: () => adminApplicationService.approveApplication(id, actionNote),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["application", id] })
       toast.success("Application approved successfully")
+      setApproveModalOpen(false)
+      setActionNote("")
     },
     onError: () => {
       toast.error("Failed to approve application")
@@ -52,10 +62,12 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
   })
 
   const rejectMutation = useMutation({
-    mutationFn: () => adminApplicationService.rejectApplication(id),
+    mutationFn: () => adminApplicationService.rejectApplication(id, actionNote),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["application", id] })
       toast.success("Application rejected successfully")
+      setRejectModalOpen(false)
+      setActionNote("")
     },
     onError: () => {
       toast.error("Failed to reject application")
@@ -74,6 +86,7 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
       case "rejected": return "bg-red-500/10 text-red-700"
       case "under_review": return "bg-amber-500/10 text-amber-700"
       case "submitted": return "bg-blue-500/10 text-blue-700"
+      case "draft": return "bg-slate-500/10 text-slate-700"
       default: return "bg-slate-500/10 text-slate-700"
     }
   }
@@ -164,18 +177,22 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
                 <Button
                   variant="default"
                   className="bg-emerald-600 hover:bg-emerald-700"
-                  onClick={() => approveMutation.mutate()}
+                  onClick={() => {
+                    setActionNote("")
+                    setApproveModalOpen(true)
+                  }}
                   disabled={approveMutation.isPending || application.status === "approved"}
                 >
-                  {approveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Approve Application
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={() => rejectMutation.mutate()}
+                  onClick={() => {
+                    setActionNote("")
+                    setRejectModalOpen(true)
+                  }}
                   disabled={rejectMutation.isPending || application.status === "rejected"}
                 >
-                  {rejectMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Reject Application
                 </Button>
               </div>
@@ -217,6 +234,14 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
               <div>
                 <p className="text-sm text-muted-foreground">Marital Status</p>
                 <p className="font-medium capitalize">{application.personalInfo?.maritalStatus}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">NIN</p>
+                <p className="font-medium">{application.personalInfo?.nin || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">BVN</p>
+                <p className="font-medium">{application.personalInfo?.bvn || 'N/A'}</p>
               </div>
             </CardContent>
           </Card>
@@ -264,58 +289,165 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <FileText className="h-5 w-5" />
-                Loan Details
+                {application.loanPurpose === 'rent' ? 'Rent Verification Details' : 'Land Verification Details'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
                 <p className="text-sm text-muted-foreground">Loan Purpose</p>
-                <p className="font-medium capitalize">{application.loanDetails?.loanPurpose}</p>
+                <p className="font-medium capitalize">{application.loanPurpose}</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Amount Requested</p>
-                <p className="font-medium text-lg">
-                  {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.loanDetails?.loanAmount || 0)}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Repayment Period</p>
-                <p className="font-medium">{application.loanDetails?.repaymentPeriod} months</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Monthly Rent</p>
-                <p className="font-medium">
-                  {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.loanDetails?.monthlyRent || 0)}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Preferred Repayment Date</p>
-                <p className="font-medium">Day {application.loanDetails?.preferredRepaymentDate} of the month</p>
-              </div>
+
+              {application.loanPurpose === 'rent' && application.rentLoanDetails && (
+                <>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Desired Loan Amount</p>
+                    <p className="font-medium text-lg">
+                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.rentLoanDetails.desiredLoanAmount)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Annual Rent Amount</p>
+                    <p className="font-medium">
+                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.rentLoanDetails.annualRentAmount)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Rent Duration</p>
+                    <p className="font-medium">{application.rentLoanDetails.rentDuration} months</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Preferred Repayment Date</p>
+                    <p className="font-medium">{application.rentLoanDetails.preferredRepaymentStartDate}</p>
+                  </div>
+                </>
+              )}
+
+              {application.loanPurpose === 'land' && application.landLoanDetails && (
+                <>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Desired Loan Amount</p>
+                    <p className="font-medium text-lg">
+                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.landLoanDetails.desiredLoanAmount)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Land Cost</p>
+                    <p className="font-medium">
+                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.landLoanDetails.totalLandCost)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Land Size</p>
+                    <p className="font-medium">{application.landLoanDetails.landSize}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Purchase Timeline</p>
+                    <p className="font-medium">{application.landLoanDetails.purchaseTimeline}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Preferred Repayment Date</p>
+                    <p className="font-medium">{application.landLoanDetails.preferredRepaymentStartDate}</p>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
-          {/* Property Details */}
+          {/* Asset/Property/Developer Details */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Home className="h-5 w-5" />
-                Property Details
+                {application.loanPurpose === 'rent' ? 'Property & Landlord Details' : 'Land & Developer Details'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div>
-                <p className="text-sm text-muted-foreground">Property Address</p>
-                <p className="font-medium">{application.loanDetails?.propertyAddress}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Landlord Name</p>
-                <p className="font-medium">{application.loanDetails?.landlordName}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Landlord Phone</p>
-                <p className="font-medium">{application.loanDetails?.landlordPhone}</p>
-              </div>
+              {application.loanPurpose === 'rent' && application.rentLoanDetails && (
+                <>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Property Address</p>
+                    <p className="font-medium">{application.rentLoanDetails.propertyAddress}</p>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <p className="text-sm font-semibold mb-2">Landlord Information</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Name</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordInfo.landlordFullName}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Phone</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordInfo.landlordPhoneNumber}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-sm text-muted-foreground">Email</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordInfo.landlordEmail}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <p className="text-sm font-semibold mb-2">Landlord Bank Details</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Bank Name</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordBankDetails.landlordBankName}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Account Number</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordBankDetails.landlordBankAccountNumber}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-sm text-muted-foreground">Account Name</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordBankDetails.landlordAccountName}</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {application.loanPurpose === 'land' && application.landLoanDetails && (
+                <>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Land Location</p>
+                    <p className="font-medium">{application.landLoanDetails.landLocation}</p>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <p className="text-sm font-semibold mb-2">Developer/Seller Information</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Name</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerInfo.developerSellerName}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Phone</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerInfo.developerSellerPhone}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-sm text-muted-foreground">Email</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerInfo.developerSellerEmail}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <p className="text-sm font-semibold mb-2">Developer/Seller Bank Details</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Bank Name</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerBankDetails.developerSellerBankName}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Account Number</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerBankDetails.developerSellerAccountNumber}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-sm text-muted-foreground">Account Name</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerBankDetails.developerSellerAccountName}</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -389,13 +521,70 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
             </DialogHeader>
             <div className="flex-1 w-full h-full min-h-0 bg-muted/20 rounded-md overflow-hidden relative">
               {viewingDocument && (
-                <iframe
-                  src={viewingDocument.url}
-                  className="w-full h-full"
-                  title="Document Viewer"
-                />
+                <DocumentViewer url={viewingDocument.url} />
               )}
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Approve Modal */}
+        <Dialog open={approveModalOpen} onOpenChange={setApproveModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Approve Application</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to approve this application? You can add optional review notes.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Textarea
+                placeholder="Add review notes (optional)..."
+                value={actionNote}
+                onChange={(e) => setActionNote(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setApproveModalOpen(false)}>Cancel</Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => approveMutation.mutate()}
+                disabled={approveMutation.isPending}
+              >
+                {approveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Confirm Approval
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reject Modal */}
+        <Dialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reject Application</DialogTitle>
+              <DialogDescription>
+                Please provide a reason for rejecting this application. This is required.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Textarea
+                placeholder="Reason for rejection (required)..."
+                value={actionNote}
+                onChange={(e) => setActionNote(e.target.value)}
+                className="min-h-[100px]"
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setRejectModalOpen(false)}>Cancel</Button>
+              <Button
+                variant="destructive"
+                onClick={() => rejectMutation.mutate()}
+                disabled={rejectMutation.isPending || !actionNote.trim()}
+              >
+                {rejectMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Confirm Rejection
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

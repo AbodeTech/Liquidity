@@ -59,7 +59,7 @@ export function RecentApplications() {
                   <div className="flex items-center gap-3">
                     <p className="font-medium text-sm">{app._id.substring(0, 8).toUpperCase()}</p>
                     <Badge variant="outline" className="text-xs capitalize">
-                      {app.loanDetails.loanPurpose}
+                      {app.loanPurpose}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">{app.personalInfo.fullName}</p>
@@ -67,7 +67,7 @@ export function RecentApplications() {
                 <div className="flex items-center gap-4">
                   <div className="text-right hidden sm:block">
                     <p className="font-medium text-sm">
-                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(app.loanDetails.loanAmount)}
+                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(app.rentLoanDetails?.desiredLoanAmount || app.landLoanDetails?.desiredLoanAmount || 0)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {format(new Date(app.submittedAt), 'MMM dd, yyyy')}

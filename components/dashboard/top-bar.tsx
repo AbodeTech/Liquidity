@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,8 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Badge } from '@/components/ui/badge'
-import { Bell, LogOut, User, Settings } from 'lucide-react'
+import { LogOut, User, Settings } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useUserProfile } from '@/lib/store/userProfile'
 import { auth } from '@/lib/auth'

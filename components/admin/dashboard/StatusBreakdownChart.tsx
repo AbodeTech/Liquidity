@@ -6,16 +6,7 @@ interface StatusBreakdownChartProps {
   data: StatusBreakdownItem[]
 }
 
-const getStatusColor = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "approved": return "hsl(var(--emerald-500))"
-    case "rejected": return "hsl(var(--red-500))"
-    case "under_review": return "hsl(var(--amber-500))"
-    case "submitted": return "hsl(var(--blue-500))"
-    case "draft": return "hsl(var(--slate-500))"
-    default: return "hsl(var(--slate-500))"
-  }
-}
+
 
 // Helper to map tailwind colors to hex/hsl for recharts
 // Note: In a real app, you might want to use a proper color palette or CSS variables

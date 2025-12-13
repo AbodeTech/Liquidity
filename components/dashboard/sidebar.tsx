@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LayoutDashboard, FileText, PlusCircle, CreditCard, FolderOpen, Bell, Settings } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { LayoutDashboard, FileText, PlusCircle } from "lucide-react"
 import { useUserProfile } from "@/lib/store/userProfile"
 
 const allNavItems = [
@@ -38,11 +39,11 @@ const allNavItems = [
   //   href: "/dashboard/notifications",
   //   icon: Bell,
   // },
-  {
-    title: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-  },
+  // {
+  //   title: "Settings",
+  //   href: "/dashboard/settings",
+  //   icon: Settings,
+  // },
 ]
 
 export function DashboardSidebar() {
@@ -63,8 +64,14 @@ export function DashboardSidebar() {
       <div className="flex flex-col h-full w-full">
         {/* Logo */}
         <div className="flex items-center justify-between p-6 border-b border-sidebar-border">
-          <Link href="/" className="text-2xl font-bold text-sidebar-foreground">
-            Liquidity
+          <Link href="/" className="inline-block relative h-10 w-40">
+            <Image
+              src="/LIQUIDELogo.png"
+              alt="Liquidity Logo"
+              fill
+              className="object-contain"
+              priority
+            />
           </Link>
         </div>
 

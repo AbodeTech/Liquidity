@@ -7,7 +7,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="border-b border-border sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+      <nav className="border-b border-border sticky top-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-foreground">
             Liquidity
@@ -26,7 +26,7 @@ export default function AboutPage() {
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">About Liquidity</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            We're on a mission to make property ownership accessible to every Nigerian through innovative micro-mortgage
+            We&apos;re on a mission to make property ownership accessible to every Nigerian through innovative micro-mortgage
             solutions.
           </p>
         </div>
@@ -42,13 +42,13 @@ export default function AboutPage() {
             </p>
             <p className="text-muted-foreground leading-relaxed mb-4">
               Our team of financial technology experts and housing advocates came together to create a platform that
-              breaks down barriers to property ownership. Whether it's helping young professionals pay their rent
-              monthly or enabling families to purchase land for their dream homes, we're committed to providing
+              breaks down barriers to property ownership. Whether it&apos;s helping young professionals pay their rent
+              monthly or enabling families to purchase land for their dream homes, we&apos;re committed to providing
               flexible, transparent, and accessible financial solutions.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Today, we've helped over 1,200 Nigerians achieve their property goals, disbursing over ₦500 million in
-              loans. But we're just getting started. Our vision is to become Nigeria's most trusted micro-mortgage
+              Today, we&apos;ve helped over 1,200 Nigerians achieve their property goals, disbursing over ₦500 million in
+              loans. But we&apos;re just getting started. Our vision is to become Nigeria&apos;s most trusted micro-mortgage
               platform, empowering millions to achieve their property ownership dreams.
             </p>
           </div>
@@ -78,7 +78,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Vision</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  To become Nigeria's most trusted micro-mortgage platform, empowering millions to achieve their
+                  To become Nigeria&apos;s most trusted micro-mortgage platform, empowering millions to achieve their
                   property ownership dreams.
                 </p>
               </CardContent>
@@ -126,7 +126,7 @@ export default function AboutPage() {
         <div className="text-center">
           <h2 className="text-3xl font-bold text-foreground mb-4">Join Our Journey</h2>
           <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Whether you're looking to finance your rent or purchase land, we're here to support you every step of the
+            Whether you&apos;re looking to finance your rent or purchase land, we&apos;re here to support you every step of the
             way.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

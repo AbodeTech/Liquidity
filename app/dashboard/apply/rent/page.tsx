@@ -22,6 +22,7 @@ import { toast } from "sonner"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { applicationService } from "@/lib/services/user/applicationService"
 import { ApplicationSaveDraftRequestType } from "@/lib/types/user/application"
+import { useUserProfile } from "@/lib/store/userProfile"
 
 
 const requiredDocuments = [
@@ -32,26 +33,38 @@ const requiredDocuments = [
   { key: "passport", label: "Passport Photograph" },
 ]
 
+const formatNumber = (value: string) => {
+  // Remove non-digit characters
+  const number = value.replace(/[^\d]/g, "")
+  // Format with commas
+  return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+
+const cleanNumber = (value: string) => {
+  return value.replace(/[^\d]/g, "")
+}
+
 export default function RentLoanPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const draftId = searchParams.get("draftId") || searchParams.get("draft")
   const queryClient = useQueryClient()
+  const { user } = useUserProfile()
 
   const [currentStep, setCurrentStep] = useState(1)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadingDocs, setUploadingDocs] = useState<Record<string, boolean>>({})
 
   // Form data state
   const [formData, setFormData] = useState({
     // Step 1: Personal Information
     fullName: "",
-    email: "",
+    email: user?.email || "",
     phone: "",
     dateOfBirth: "",
     gender: "",
     maritalStatus: "",
     dependents: "",
+
 
     // Step 2: Employment Information
     employmentStatus: "",
@@ -96,6 +109,13 @@ export default function RentLoanPage() {
     enabled: !!draftId,
   })
 
+  // Pre-fill email from user profile
+  useEffect(() => {
+    if (user?.email && formData.email !== user.email) {
+      setFormData(prev => ({ ...prev, email: user.email }))
+    }
+  }, [user, formData.email])
+
   // Populate form with draft data
   useEffect(() => {
     if (draftData?.data) {
@@ -104,8 +124,21 @@ export default function RentLoanPage() {
         ...prev,
         ...draft.personalInfo,
         ...draft.employment,
-        ...draft.loanDetails,
+        monthlyIncome: formatNumber(draft.employment?.monthlyIncome?.toString() || ""),
+        ...draft.rentLoanDetails,
+        // Map nested objects back to flat state
+        loanAmount: formatNumber(draft.rentLoanDetails?.desiredLoanAmount?.toString() || ""),
+        rentAmount: formatNumber(draft.rentLoanDetails?.annualRentAmount?.toString() || ""),
+        rentDuration: draft.rentLoanDetails?.rentDuration?.toString() || "",
+        repaymentStartDate: draft.rentLoanDetails?.preferredRepaymentStartDate || "",
+        landlordName: draft.rentLoanDetails?.landlordInfo?.landlordFullName || "",
+        landlordPhone: draft.rentLoanDetails?.landlordInfo?.landlordPhoneNumber || "",
+        landlordEmail: draft.rentLoanDetails?.landlordInfo?.landlordEmail || "",
+        landlordAccountNumber: draft.rentLoanDetails?.landlordBankDetails?.landlordBankAccountNumber || "",
+        landlordBankName: draft.rentLoanDetails?.landlordBankDetails?.landlordBankName || "",
+        landlordAccountName: draft.rentLoanDetails?.landlordBankDetails?.landlordAccountName || "",
         currentStep: parseInt(draft.currentStep || "1"),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         documents: draft.documents?.reduce((acc: Record<string, any>, doc: any) => ({
           ...acc,
           [doc.documentType]: doc
@@ -130,26 +163,35 @@ export default function RentLoanPage() {
         gender: data.gender,
         maritalStatus: data.maritalStatus,
         numberOfDependents: Number(data.dependents || 0),
+        nin: data.nin,
+        bvn: data.bvn,
       },
       employment: {
         employmentStatus: data.employmentStatus,
         employer: data.employerName,
         jobTitle: data.jobTitle,
-        monthlyIncome: data.monthlyIncome ? Number(data.monthlyIncome) : 0,
+        monthlyIncome: data.monthlyIncome ? Number(cleanNumber(data.monthlyIncome)) : 0,
         yearsEmployed: Number(data.yearsEmployed || 0),
         officeAddress: data.workAddress,
         employerPhone: data.officePhone,
       },
-      loanDetails: {
-        loanAmount: Number(data.loanAmount || 0),
-        loanPurpose: "Rent Loan",
+      loanPurpose: "rent",
+      rentLoanDetails: {
+        desiredLoanAmount: Number(cleanNumber(data.loanAmount || "0")),
+        annualRentAmount: Number(cleanNumber(data.rentAmount || "0")),
+        rentDuration: Number(data.rentDuration || 12),
+        preferredRepaymentStartDate: data.repaymentStartDate,
         propertyAddress: data.propertyAddress,
-        landlordName: data.landlordName,
-        landlordPhone: data.landlordPhone,
-        // landlordEmail, landlordAccountName, landlordAccountNumber, landlordBankName omitted as per API requirements
-        monthlyRent: Number(data.rentAmount || 0),
-        repaymentPeriod: Number(data.rentDuration || 12),
-        preferredRepaymentDate: data.repaymentStartDate,
+        landlordInfo: {
+          landlordFullName: data.landlordName,
+          landlordPhoneNumber: data.landlordPhone,
+          landlordEmail: data.landlordEmail,
+        },
+        landlordBankDetails: {
+          landlordBankAccountNumber: data.landlordAccountNumber,
+          landlordBankName: data.landlordBankName,
+          landlordAccountName: data.landlordAccountName,
+        }
       },
       documents: documentsArray
     }
@@ -219,12 +261,19 @@ export default function RentLoanPage() {
     }
   })
 
-
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    let finalValue = value
+
+    // Format amount fields
+    if (["monthlyIncome", "loanAmount", "rentAmount"].includes(field)) {
+      finalValue = formatNumber(value)
+    }
+
+    setFormData(prev => ({ ...prev, [field]: finalValue }))
   }
+
+
 
   const handleSaveDraft = () => {
     saveDraftMutation.mutate(getPayloadFromData(formData))
@@ -242,23 +291,20 @@ export default function RentLoanPage() {
   }
 
   const handleSubmit = async () => {
-    setIsSubmitting(true)
 
-    // Create base payload from current data
     const basePayload = getPayloadFromData(formData)
 
-    // Create submission payload without currentStep
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { currentStep, ...submissionPayload } = basePayload
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload = {
       ...submissionPayload,
       draftId: draftId || undefined
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
 
     submitApplicationMutation.mutate(payload)
-    // Don't set isSubmitting false immediately, wait for redirect
   }
 
   const handleFileUpload = (file: File, key: string) => {
@@ -330,6 +376,8 @@ export default function RentLoanPage() {
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     placeholder="your.email@example.com"
+                    disabled
+                    className="bg-muted text-muted-foreground"
                   />
                 </div>
 
@@ -862,9 +910,9 @@ export default function RentLoanPage() {
         ) : (
           <Button
             onClick={handleSubmit}
-            disabled={!formData.termsAccepted || !formData.declarationAccepted || isSubmitting || submitApplicationMutation.isPending}
+            disabled={!formData.termsAccepted || !formData.declarationAccepted || submitApplicationMutation.isPending}
           >
-            {(isSubmitting || submitApplicationMutation.isPending) ? (
+            {(submitApplicationMutation.isPending) ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...
               </>

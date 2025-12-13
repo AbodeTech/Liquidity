@@ -46,6 +46,7 @@ export default function ForgotPasswordPage() {
       setSuccess(true)
       toast.success("Reset link sent successfully")
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const message = error.response?.data?.message || "Failed to send reset link. Please try again."
       toast.error(message)

@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Loader2, Mail, ArrowLeft } from 'lucide-react'
@@ -92,8 +93,16 @@ export default function VerifyEmailPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold text-white">
-            Abodex
+          <Link href="/" className="inline-block">
+            <div className="relative h-12 w-48">
+              <Image
+                src="/LIQUIDELogo.png"
+                alt="Liquidity Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           </Link>
         </div>
 

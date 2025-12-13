@@ -1,7 +1,5 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { DashboardTopBar } from '@/components/dashboard/top-bar'
 import { MobileBottomNav } from '@/components/dashboard/mobile-bottom-nav'
@@ -11,7 +9,6 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const router = useRouter()
 
 
 
