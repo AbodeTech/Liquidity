@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Link from "next/link"
 import { Search, Loader2 } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { adminApplicationService } from "@/lib/services/admin/applicationService"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
@@ -16,7 +16,7 @@ import { format } from "date-fns"
 import { Application } from "@/lib/types/admin/application"
 import { useDebounce } from "@/hooks/use-debounce"
 
-export default function ApplicationsPage() {
+function ApplicationsContent() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -298,5 +298,19 @@ export default function ApplicationsPage() {
         )}
       </div>
     </AdminLayout>
+  )
+}
+
+export default function ApplicationsPage() {
+  return (
+    <Suspense fallback={
+      <AdminLayout>
+        <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AdminLayout>
+    }>
+      <ApplicationsContent />
+    </Suspense>
   )
 }

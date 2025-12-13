@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -44,7 +44,7 @@ const cleanNumber = (value: string) => {
   return value.replace(/[^\d]/g, "")
 }
 
-export default function RentLoanPage() {
+function RentLoanContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const draftId = searchParams.get("draftId") || searchParams.get("draft")
@@ -921,5 +921,17 @@ export default function RentLoanPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function RentLoanPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <RentLoanContent />
+    </Suspense>
   )
 }
