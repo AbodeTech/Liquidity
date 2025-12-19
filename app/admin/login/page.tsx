@@ -78,7 +78,7 @@ export default function AdminLoginPage() {
           <div className="flex justify-center">
             <div className="flex items-center gap-2">
               <Building2 className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold text-primary">Liquidity</span>
+              <span className="text-2xl font-bold text-primary">Liquide</span>
             </div>
           </div>
           <div>
@@ -96,7 +96,7 @@ export default function AdminLoginPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="admin@liquidity.ng" {...field} />
+                      <Input placeholder="admin@liquide.ng" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

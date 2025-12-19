@@ -1,21 +1,28 @@
 import { axiosInstance } from "@/lib/axios";
 import { ApplicationRequestType, ApplicationSaveDraftRequestType, ApplicationUploadDocumentDeleteRequestType, ApplicationUploadDocumentRequestType, GetAplicationsFilterParams } from "@/lib/types/user/application";
+import { uploadToCloudinary } from "./uploadToCloudinary";
 
 
 
 
 export const applicationService = {
   submitApplication: (payload: ApplicationRequestType) => axiosInstance.post("/api/applications/submit", payload),
-  uploadDocument: (payload: ApplicationUploadDocumentRequestType) => {
-    const formData = new FormData()
-    formData.append("file", payload.file)
-    formData.append("documentType", payload.documentType)
+  uploadDocument: async (payload: ApplicationUploadDocumentRequestType) => {
+    // First upload to Cloudinary
+    const cloudinaryResponse = await uploadToCloudinary({
+      file: payload.file,
+      folder: "documents",
+    });
 
-    return axiosInstance.post("/api/uploads/document", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    })
+    if (!cloudinaryResponse) {
+      throw new Error("Failed to upload document to Cloudinary");
+    }
+
+    // Then send the documentUrl to the API
+    return axiosInstance.post("/api/uploads/document", {
+      documentUrl: cloudinaryResponse.secure_url,
+      documentType: payload.documentType,
+    });
   },
   deleteDocument: (payload: ApplicationUploadDocumentDeleteRequestType) => axiosInstance.delete("/api/uploads/document", { data: payload }),
   saveDraft: (payload: ApplicationSaveDraftRequestType) => axiosInstance.post("/api/drafts", payload),

@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
           {/* Logo */}
           <div className="text-center mb-8">
             <Link href="/" className="text-3xl font-bold text-white">
-              Liquidity
+              Liquide
             </Link>
           </div>
 
@@ -143,7 +143,7 @@ export default function ForgotPasswordPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="text-3xl font-bold text-white">
-            Liquidity
+            Liquide
           </Link>
         </div>
 

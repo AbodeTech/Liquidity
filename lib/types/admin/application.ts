@@ -8,25 +8,25 @@ export interface FilterParams {
 }
 
 export interface PersonalInfo {
-  fullName: string
-  email: string
-  phoneNumber: string
-  dateOfBirth: string
-  gender: string
-  maritalStatus: string
-  numberOfDependents: number
-  nin: string
-  bvn: string
+  fullName?: string
+  email?: string
+  phoneNumber?: string
+  dateOfBirth?: string
+  gender?: string
+  maritalStatus?: string
+  numberOfDependents?: number
+  nin?: string
+  bvn?: string
 }
 
 export interface Employment {
-  employmentStatus: string
-  employer: string
-  jobTitle: string
-  monthlyIncome: number
-  yearsEmployed: number
-  officeAddress: string
-  employerPhone: string
+  employmentStatus?: string
+  employer?: string
+  jobTitle?: string
+  monthlyIncome?: number
+  yearsEmployed?: number
+  officeAddress?: string
+  employerPhone?: string
 }
 
 
@@ -39,48 +39,48 @@ export interface Document {
 }
 
 export interface LandlordInfo {
-  landlordFullName: string
-  landlordPhoneNumber: string
-  landlordEmail: string
+  landlordFullName?: string
+  landlordPhoneNumber?: string
+  landlordEmail?: string
 }
 
 export interface LandlordBankDetails {
-  landlordBankAccountNumber: string
-  landlordBankName: string
-  landlordAccountName: string
+  landlordBankAccountNumber?: string
+  landlordBankName?: string
+  landlordAccountName?: string
 }
 
 export interface RentLoanDetails {
-  desiredLoanAmount: number
-  annualRentAmount: number
-  rentDuration: number
-  preferredRepaymentStartDate: string
-  propertyAddress: string
-  landlordInfo: LandlordInfo
-  landlordBankDetails: LandlordBankDetails
+  desiredLoanAmount?: number
+  annualRentAmount?: number
+  rentDuration?: number
+  preferredRepaymentStartDate?: string
+  propertyAddress?: string
+  landlordInfo?: LandlordInfo
+  landlordBankDetails?: LandlordBankDetails
 }
 
 export interface DeveloperSellerInfo {
-  developerSellerName: string
-  developerSellerPhone: string
-  developerSellerEmail: string
+  developerSellerName?: string
+  developerSellerPhone?: string
+  developerSellerEmail?: string
 }
 
 export interface DeveloperSellerBankDetails {
-  developerSellerAccountNumber: string
-  developerSellerBankName: string
-  developerSellerAccountName: string
+  developerSellerAccountNumber?: string
+  developerSellerBankName?: string
+  developerSellerAccountName?: string
 }
 
 export interface LandLoanDetails {
-  desiredLoanAmount: number
-  totalLandCost: number
-  landSize: string
-  purchaseTimeline: string
-  preferredRepaymentStartDate: string
-  landLocation: string
-  developerSellerInfo: DeveloperSellerInfo
-  developerSellerBankDetails: DeveloperSellerBankDetails
+  desiredLoanAmount?: number
+  totalLandCost?: number
+  landSize?: string
+  purchaseTimeline?: string
+  preferredRepaymentStartDate?: string
+  landLocation?: string
+  developerSellerInfo?: DeveloperSellerInfo
+  developerSellerBankDetails?: DeveloperSellerBankDetails
 }
 
 

@@ -23,7 +23,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Liquidity - Affordable Micro-Mortgages for Rent & Land",
+  title: "Liquide - Affordable Micro-Mortgages for Rent & Land",
   description:
     "Get flexible micro-mortgage loans for rent and land acquisition. Monthly repayments from ₦50,000. Apply today and get approved in 24 hours.",
   icons: {

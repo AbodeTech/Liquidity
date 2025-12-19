@@ -150,50 +150,50 @@ function RentLoanContent() {
   }, [draftData])
 
   // Get Payload Helper
-  const getPayloadFromData = (data: typeof formData): ApplicationSaveDraftRequestType => {
+  const getPayloadFromData = (data: typeof formData) => {
     const documentsArray = Object.values(data.documents)
     console.log(documentsArray)
     return {
       currentStep: currentStep.toString(),
       personalInfo: {
-        fullName: data.fullName,
-        email: data.email,
-        phoneNumber: data.phone,
-        dateOfBirth: data.dateOfBirth,
-        gender: data.gender,
-        maritalStatus: data.maritalStatus,
-        numberOfDependents: Number(data.dependents || 0),
-        nin: data.nin,
-        bvn: data.bvn,
+        fullName: data.fullName || undefined,
+        email: data.email || undefined,
+        phoneNumber: data.phone || undefined,
+        dateOfBirth: data.dateOfBirth || undefined,
+        gender: data.gender || undefined,
+        maritalStatus: data.maritalStatus || undefined,
+        numberOfDependents: data.dependents ? Number(data.dependents) : undefined,
+        nin: data.nin || undefined,
+        bvn: data.bvn || undefined,
       },
       employment: {
-        employmentStatus: data.employmentStatus,
-        employer: data.employerName,
-        jobTitle: data.jobTitle,
-        monthlyIncome: data.monthlyIncome ? Number(cleanNumber(data.monthlyIncome)) : 0,
-        yearsEmployed: Number(data.yearsEmployed || 0),
-        officeAddress: data.workAddress,
-        employerPhone: data.officePhone,
+        employmentStatus: data.employmentStatus || undefined,
+        employer: data.employerName || undefined,
+        jobTitle: data.jobTitle || undefined,
+        monthlyIncome: data.monthlyIncome ? Number(cleanNumber(data.monthlyIncome)) : undefined,
+        yearsEmployed: data.yearsEmployed ? Number(data.yearsEmployed) : undefined,
+        officeAddress: data.workAddress || undefined,
+        employerPhone: data.officePhone || undefined,
       },
-      loanPurpose: "rent",
+      loanPurpose: "rent" as const,
       rentLoanDetails: {
-        desiredLoanAmount: Number(cleanNumber(data.loanAmount || "0")),
-        annualRentAmount: Number(cleanNumber(data.rentAmount || "0")),
-        rentDuration: Number(data.rentDuration || 12),
-        preferredRepaymentStartDate: data.repaymentStartDate,
-        propertyAddress: data.propertyAddress,
+        desiredLoanAmount: data.loanAmount ? Number(cleanNumber(data.loanAmount)) : undefined,
+        annualRentAmount: data.rentAmount ? Number(cleanNumber(data.rentAmount)) : undefined,
+        rentDuration: data.rentDuration ? Number(data.rentDuration) : undefined,
+        preferredRepaymentStartDate: data.repaymentStartDate || undefined,
+        propertyAddress: data.propertyAddress || undefined,
         landlordInfo: {
-          landlordFullName: data.landlordName,
-          landlordPhoneNumber: data.landlordPhone,
-          landlordEmail: data.landlordEmail,
+          landlordFullName: data.landlordName || undefined,
+          landlordPhoneNumber: data.landlordPhone || undefined,
+          landlordEmail: data.landlordEmail || undefined,
         },
         landlordBankDetails: {
-          landlordBankAccountNumber: data.landlordAccountNumber,
-          landlordBankName: data.landlordBankName,
-          landlordAccountName: data.landlordAccountName,
+          landlordBankAccountNumber: data.landlordAccountNumber || undefined,
+          landlordBankName: data.landlordBankName || undefined,
+          landlordAccountName: data.landlordAccountName || undefined,
         }
       },
-      documents: documentsArray
+      documents: documentsArray.length > 0 ? documentsArray : undefined
     }
   }
 
@@ -215,14 +215,13 @@ function RentLoanContent() {
       queryClient.invalidateQueries({ queryKey: ['drafts'] })
     },
     onError: () => {
-      // toast.error("Failed to save draft")
+      toast.error("Failed to save draft")
     }
   })
 
   const uploadDocumentMutation = useMutation({
     mutationFn: applicationService.uploadDocument,
     onSuccess: (response, variables) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const docData = response.data as any
       console.log(docData)
 
@@ -231,10 +230,10 @@ function RentLoanContent() {
         documents: {
           ...prev.documents,
           [variables.documentType]: {
-            documentId: docData?.documentId,
+            documentId: crypto.randomUUID(),
             documentType: variables?.documentType,
             documentUrl: docData?.documentUrl,
-            uploadedAt: docData?.uploadedAt,
+            uploadedAt: docData?.uploadedAt || new Date().toISOString(),
           }
         }
       }))

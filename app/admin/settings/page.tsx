@@ -173,7 +173,7 @@ export default function AdminSettingsPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Email</Label>
-              <Input value="admin@liquidity.ng" disabled />
+              <Input value="admin@liquide.ng" disabled />
             </div>
             <Button variant="outline">Change Password</Button>
           </CardContent>

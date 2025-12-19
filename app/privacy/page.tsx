@@ -9,7 +9,7 @@ export default function PrivacyPage() {
       <nav className="border-b border-border sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-foreground">
-            Liquidity
+            Liquide
           </Link>
           <Button variant="ghost" asChild>
             <Link href="/">
@@ -30,9 +30,9 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">1. Introduction</h2>
             <p className="text-muted-foreground leading-relaxed">
-              At Liquidity, we are committed to protecting your privacy and personal information. This Privacy Policy
+              At Liquide, we are committed to protecting your privacy and personal information. This Privacy Policy
               explains how we collect, use, store, and protect your data when you use our micro-mortgage platform and
-              services. By using Liquidity, you consent to the practices described in this policy.
+              services. By using Liquide, you consent to the practices described in this policy.
             </p>
           </section>
 
@@ -188,7 +188,7 @@ export default function PrivacyPage() {
               If you have questions about this Privacy Policy or wish to exercise your rights, please contact us:
             </p>
             <div className="text-muted-foreground space-y-1">
-              <p>Email: privacy@liquidity.ng</p>
+              <p>Email: privacy@liquide.ng</p>
               <p>Phone: +234 XXX XXX XXXX</p>
               <p>Address: [Company Address]</p>
             </div>
@@ -206,10 +206,10 @@ export default function PrivacyPage() {
 
         <div className="mt-12 pt-8 border-t border-border text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            By using Liquidity&apos;s services, you acknowledge that you have read and understood this Privacy Policy.
+            By using Liquide&apos;s services, you acknowledge that you have read and understood this Privacy Policy.
           </p>
           <Button asChild>
-            <Link href="/apply">Continue to Application</Link>
+            <Link href="/dashboard/apply">Continue to Application</Link>
           </Button>
         </div>
       </div>

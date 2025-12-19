@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { ArrowLeft, Target, Eye, Users } from "lucide-react"
+import Image from "next/image"
 
 export default function AboutPage() {
   return (
@@ -9,8 +10,16 @@ export default function AboutPage() {
       {/* Navigation */}
       <nav className="border-b border-border sticky top-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-foreground">
-            Liquidity
+          <Link href="/" className="inline-block">
+            <div className="relative h-12 w-48">
+              <Image
+                src="/LIQUIDELogo.png"
+                alt="Liquide Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           </Link>
           <Button variant="ghost" asChild>
             <Link href="/">
@@ -24,7 +33,7 @@ export default function AboutPage() {
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">About Liquidity</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">About Liquide</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
             We&apos;re on a mission to make property ownership accessible to every Nigerian through innovative micro-mortgage
             solutions.
@@ -36,7 +45,7 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold text-foreground mb-6">Our Story</h2>
           <div className="prose prose-neutral dark:prose-invert max-w-none">
             <p className="text-muted-foreground leading-relaxed mb-4">
-              Liquidity was founded with a simple belief: everyone deserves access to affordable housing finance. In
+              Liquide was founded with a simple belief: everyone deserves access to affordable housing finance. In
               Nigeria, where over 60% of urban residents struggle to afford annual rent payments upfront, we saw an
               opportunity to make a real difference.
             </p>
@@ -131,7 +140,7 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
-              <Link href="/apply">Start Your Application</Link>
+              <Link href="/dashboard/apply">Start Your Application</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
               <Link href="/calculator">Calculate Your Loan</Link>
