@@ -40,11 +40,16 @@ export default function LandingPage() {
         className="border-b border-border sticky top-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50"
       >
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="relative h-8 w-8">
-              <Image src="/Logo.svg" alt="Liquidity Logo" fill className="object-contain" />
+          <Link href="/" className="inline-block">
+            <div className="relative h-12 w-48">
+              <Image
+                src="/LIQUIDELogo.png"
+                alt="Liquide Logo"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
-            <span className="text-2xl font-bold text-foreground">Liquidity</span>
           </Link>
           <div className="hidden md:flex items-center gap-6">
             <a
@@ -129,7 +134,7 @@ export default function LandingPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" asChild className="text-lg px-8">
-                  <Link href="/apply">
+                  <Link href="/dashboard/apply">
                     Apply for Loan
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
@@ -311,7 +316,7 @@ export default function LandingPage() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Why Choose Liquidity?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Why Choose Liquide?</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             We make homeownership accessible with transparent processes and customer-first approach.
           </p>
@@ -374,12 +379,12 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 text-center relative z-20">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance text-white">Ready to Get Started?</h2>
           <p className="text-lg mb-8 text-white/90 max-w-2xl mx-auto text-pretty leading-relaxed">
-            Join thousands of Nigerians who have achieved their property goals with Liquidity. Apply today and get
+            Join thousands of Nigerians who have achieved their property goals with Liquide. Apply today and get
             approved in 24 hours.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" asChild className="shadow-xl">
-              <Link href="/apply">Start Your Application</Link>
+              <Link href="/dashboard/apply">Start Your Application</Link>
             </Button>
             <Button
               size="lg"
@@ -398,7 +403,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">Liquidity</h3>
+              <h3 className="text-xl font-bold mb-4">Liquide</h3>
               <p className="text-background/70 text-sm">Making home and land financing accessible to all Nigerians.</p>
             </div>
             <div>
@@ -415,7 +420,7 @@ export default function LandingPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/apply" className="hover:text-background">
+                  <Link href="/dashboard/apply" className="hover:text-background">
                     Apply for Loan
                   </Link>
                 </li>
@@ -439,13 +444,13 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-sm text-background/70">
-                <li>support@liquidity.ng</li>
+                <li>support@liquide.ng</li>
                 <li>Lagos, Nigeria</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-background/20 pt-8 text-center text-sm text-background/60">
-            © {new Date().getFullYear()} Liquidity. All rights reserved.
+            © {new Date().getFullYear()} Liquide. All rights reserved.
           </div>
         </div>
       </footer>

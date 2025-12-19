@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Reverted to Liquidity green and gold theme for public pages */
+  /* Reverted to Liquide green and gold theme for public pages */
   /* Warm White Background */
   --background: oklch(0.99 0.005 90);
   /* Deep Forest Green Foreground */

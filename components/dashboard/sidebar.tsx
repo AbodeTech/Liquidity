@@ -67,7 +67,7 @@ export function DashboardSidebar() {
           <Link href="/" className="inline-block relative h-10 w-40">
             <Image
               src="/LIQUIDELogo.png"
-              alt="Liquidity Logo"
+              alt="Liquide Logo"
               fill
               className="object-contain"
               priority

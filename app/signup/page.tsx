@@ -37,7 +37,7 @@ export default function SignupPage() {
           </p>
           <div className="flex flex-col gap-3">
             <Button asChild className="w-full">
-              <Link href="/apply">Apply for a Loan</Link>
+              <Link href="/dashboard/apply">Apply for a Loan</Link>
             </Button>
             <Button asChild variant="outline" className="w-full">
               <Link href="/">Go to Home Page</Link>

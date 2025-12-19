@@ -97,7 +97,7 @@ export default function VerifyEmailPage() {
             <div className="relative h-12 w-48">
               <Image
                 src="/LIQUIDELogo.png"
-                alt="Liquidity Logo"
+                alt="Liquide Logo"
                 fill
                 className="object-contain"
                 priority

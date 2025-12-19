@@ -182,7 +182,7 @@ function LandLoanContent() {
         officeAddress: data.workAddress,
         employerPhone: data.officePhone,
       },
-      loanPurpose: "land",
+      loanPurpose: "land" as const,
       landLoanDetails: {
         desiredLoanAmount: Number(cleanNumber(data.loanAmount || "0")),
         totalLandCost: Number(cleanNumber(data.landCost || "0")),
@@ -233,16 +233,17 @@ function LandLoanContent() {
     onSuccess: (response, variables) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const docData = response.data as any
+      console.log(docData)
 
       setFormData(prev => ({
         ...prev,
         documents: {
           ...prev.documents,
           [variables.documentType]: {
-            documentId: docData.id || docData._id,
-            documentType: variables.documentType,
-            documentUrl: docData.url || docData.fileUrl,
-            uploadedAt: new Date().toISOString()
+            documentId: crypto.randomUUID(),
+            documentType: variables?.documentType,
+            documentUrl: docData?.documentUrl,
+            uploadedAt: docData?.uploadedAt || new Date().toISOString(),
           }
         }
       }))
@@ -344,7 +345,7 @@ function LandLoanContent() {
       <nav className="border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-foreground">
-            Liquidity
+            Liquide
           </Link>
           <Button variant="outline" onClick={() => router.push("/dashboard/apply")}>
             <ArrowLeft className="w-4 h-4 mr-2" />

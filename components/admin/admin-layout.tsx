@@ -48,7 +48,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <div className="relative h-8 w-32">
                 <Image
                   src="/LIQUIDELogo.png"
-                  alt="Liquidity Logo"
+                  alt="Liquide Logo"
                   fill
                   className="object-contain"
                   priority
@@ -87,7 +87,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium">Admin User</p>
-                    <p className="text-xs text-muted-foreground">admin@liquidity.ng</p>
+                    <p className="text-xs text-muted-foreground">admin@liquide.ng</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />

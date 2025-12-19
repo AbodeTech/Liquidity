@@ -9,7 +9,7 @@ export default function TermsPage() {
       <nav className="border-b border-border sticky top-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-foreground">
-            Liquidity
+            Liquide
           </Link>
           <Button variant="ghost" asChild>
             <Link href="/">
@@ -30,7 +30,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">1. Introduction</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Welcome to Liquidity. These Terms and Conditions govern your use of our micro-mortgage platform and
+              Welcome to Liquide. These Terms and Conditions govern your use of our micro-mortgage platform and
               services. By accessing or using our services, you agree to be bound by these terms. If you do not agree
               with any part of these terms, please do not use our services.
             </p>
@@ -147,7 +147,7 @@ export default function TermsPage() {
               For questions or concerns about these Terms and Conditions, please contact us at:
             </p>
             <div className="mt-4 text-muted-foreground">
-              <p>Email: support@liquidity.ng</p>
+              <p>Email: support@liquide.ng</p>
               <p>Phone: +234 XXX XXX XXXX</p>
             </div>
           </section>
@@ -155,11 +155,11 @@ export default function TermsPage() {
 
         <div className="mt-12 pt-8 border-t border-border text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            By using Liquidity&apos;s services, you acknowledge that you have read, understood, and agree to these Terms and
+            By using Liquide&apos;s services, you acknowledge that you have read, understood, and agree to these Terms and
             Conditions.
           </p>
           <Button asChild>
-            <Link href="/apply">Accept and Apply Now</Link>
+            <Link href="/dashboard/apply">Accept and Apply Now</Link>
           </Button>
         </div>
       </div>

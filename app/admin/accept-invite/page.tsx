@@ -117,7 +117,7 @@ export default function AdminAcceptInvitePage() {
           <div className="flex justify-center">
             <div className="flex items-center gap-2">
               <Building2 className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold text-primary">Liquidity</span>
+              <span className="text-2xl font-bold text-primary">Liquide</span>
             </div>
           </div>
           <div>

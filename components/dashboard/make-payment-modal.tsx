@@ -223,7 +223,7 @@ export function MakePaymentModal({ open, onOpenChange }: MakePaymentModalProps) 
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Account Name:</span>
-                          <span className="font-medium">Liquidity Microfinance</span>
+                          <span className="font-medium">Liquide Microfinance</span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-muted-foreground">Account Number:</span>

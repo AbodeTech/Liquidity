@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
 import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
+import Image from "next/image"
 
 export default function CalculatorPage() {
   // Rent Loan State
@@ -50,8 +51,16 @@ export default function CalculatorPage() {
       {/* Navigation */}
       <nav className="border-b border-border sticky top-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-foreground">
-            Liquidity
+          <Link href="/" className="inline-block">
+            <div className="relative h-12 w-48">
+              <Image
+                src="/LIQUIDELogo.png"
+                alt="Liquide Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           </Link>
           <Button variant="ghost" asChild>
             <Link href="/">
@@ -157,7 +166,7 @@ export default function CalculatorPage() {
                   </div>
 
                   <Button size="lg" variant="secondary" asChild className="w-full">
-                    <Link href="/apply/rent">Apply for Rent Loan</Link>
+                    <Link href="/dashboard/apply/rent">Apply for Rent Loan</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -260,7 +269,7 @@ export default function CalculatorPage() {
                   </div>
 
                   <Button size="lg" variant="secondary" asChild className="w-full">
-                    <Link href="/apply/land">Apply for Land Loan</Link>
+                    <Link href="/dashboard/apply/land">Apply for Land Loan</Link>
                   </Button>
                 </CardContent>
               </Card>
