@@ -1,5 +1,6 @@
 import { AlertCircle, Loader2 } from "lucide-react"
 import { useState } from "react"
+import Image from "next/image"
 
 export default function DocumentViewer({ url }: { url: string }) {
   const [isLoading, setIsLoading] = useState(true)
@@ -36,13 +37,16 @@ export default function DocumentViewer({ url }: { url: string }) {
       {/* Content Renderer */}
       {!hasError && (
         isImage ? (
-          <img
-            src={url}
-            alt="Document Viewer"
-            className={`w-full h-full object-contain transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
-            onLoad={() => setIsLoading(false)}
-            onError={() => { setIsLoading(false); setHasError(true); }}
-          />
+          <div className={`relative w-full h-full transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+            <Image
+              src={url}
+              alt="Document Viewer"
+              fill
+              className="object-contain"
+              onLoadingComplete={() => setIsLoading(false)}
+              onError={() => { setIsLoading(false); setHasError(true); }}
+            />
+          </div>
         ) : (
           <iframe
             src={url}

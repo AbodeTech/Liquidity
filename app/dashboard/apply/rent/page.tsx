@@ -21,7 +21,7 @@ import { FileUpload } from "@/components/dashboard/file-upload"
 import { toast } from "sonner"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { applicationService } from "@/lib/services/user/applicationService"
-import { ApplicationSaveDraftRequestType } from "@/lib/types/user/application"
+import { ApplicationSaveDraftRequestType, ApplicationRequestType } from "@/lib/types/user/application"
 import { useUserProfile } from "@/lib/store/userProfile"
 
 
@@ -91,8 +91,7 @@ function RentLoanContent() {
     // Step 4: KYC Documents
     bvn: "",
     nin: "",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    documents: {} as Record<string, any>,
+    documents: {} as Record<string, import("@/lib/types/admin/application").Document>,
 
     // Step 5: Review
     termsAccepted: false,
@@ -138,8 +137,7 @@ function RentLoanContent() {
         landlordBankName: draft.rentLoanDetails?.landlordBankDetails?.landlordBankName || "",
         landlordAccountName: draft.rentLoanDetails?.landlordBankDetails?.landlordAccountName || "",
         currentStep: parseInt(draft.currentStep || "1"),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        documents: draft.documents?.reduce((acc: Record<string, any>, doc: any) => ({
+        documents: draft.documents?.reduce((acc: Record<string, import("@/lib/types/admin/application").Document>, doc: import("@/lib/types/admin/application").Document) => ({
           ...acc,
           [doc.documentType]: doc
         }), {}) || {},
@@ -207,8 +205,8 @@ function RentLoanContent() {
       }
     },
     onSuccess: (response) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const savedDraftId = (response.data as any)?.id || (response.data as any)?._id || draftId
+      const data = response.data as { id?: string; _id?: string }
+      const savedDraftId = data?.id || data?._id || draftId
       if (savedDraftId && savedDraftId !== draftId) {
         router.push(`/dashboard/apply/rent?draftId=${savedDraftId}`)
       }
@@ -222,7 +220,7 @@ function RentLoanContent() {
   const uploadDocumentMutation = useMutation({
     mutationFn: applicationService.uploadDocument,
     onSuccess: (response, variables) => {
-      const docData = response.data as any
+      const docData = response.data as { documentUrl: string; uploadedAt: string }
       console.log(docData)
 
       setFormData(prev => ({
@@ -260,12 +258,11 @@ function RentLoanContent() {
     }
   })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     let finalValue = value
 
     // Format amount fields
-    if (["monthlyIncome", "loanAmount", "rentAmount"].includes(field)) {
+    if (["monthlyIncome", "loanAmount", "rentAmount"].includes(field) && typeof value === 'string') {
       finalValue = formatNumber(value)
     }
 
@@ -300,10 +297,9 @@ function RentLoanContent() {
     const payload = {
       ...submissionPayload,
       draftId: draftId || undefined
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    }
 
-    submitApplicationMutation.mutate(payload)
+    submitApplicationMutation.mutate(payload as unknown as ApplicationRequestType)
   }
 
   const handleFileUpload = (file: File, key: string) => {

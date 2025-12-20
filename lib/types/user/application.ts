@@ -1,4 +1,4 @@
-import { Employment, LandLoanDetails, PersonalInfo, RentLoanDetails } from "../admin/application";
+import { Document, Employment, LandLoanDetails, PersonalInfo, RentLoanDetails } from "../admin/application";
 
 
 
