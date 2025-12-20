@@ -22,7 +22,7 @@ import { FileUpload } from "@/components/dashboard/file-upload"
 import { toast } from "sonner"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { applicationService } from "@/lib/services/user/applicationService"
-import { ApplicationSaveDraftRequestType } from "@/lib/types/user/application"
+import { ApplicationSaveDraftRequestType, ApplicationRequestType } from "@/lib/types/user/application"
 import { useUserProfile } from "@/lib/store/userProfile"
 
 
@@ -95,8 +95,7 @@ function LandLoanContent() {
     // Step 4: Documents
     bvn: "",
     nin: "",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    documents: {} as Record<string, any>,
+    documents: {} as Record<string, import("@/lib/types/admin/application").Document>,
 
     // Step 5: Review
     termsAccepted: false,
@@ -146,8 +145,7 @@ function LandLoanContent() {
         developerAccountName: draft.landLoanDetails?.developerSellerBankDetails?.developerSellerAccountName || "",
         // Other fields handled by spread ...draft.loanDetails if they match key names
         currentStep: parseInt(draft.currentStep || "1"),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        documents: draft.documents?.reduce((acc: Record<string, any>, doc: any) => ({
+        documents: draft.documents?.reduce((acc: Record<string, import("@/lib/types/admin/application").Document>, doc: import("@/lib/types/admin/application").Document) => ({
           ...acc,
           [doc.documentType]: doc
         }), {}) || {},
@@ -215,8 +213,8 @@ function LandLoanContent() {
       }
     },
     onSuccess: (response) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const savedDraftId = (response.data as any)?.id || (response.data as any)?._id || draftId
+      const data = response.data as { id?: string; _id?: string }
+      const savedDraftId = data?.id || data?._id || draftId
       if (savedDraftId && savedDraftId !== draftId) {
         // Since this page is at /app/apply/land, we just update params
         router.replace(`/apply/land?draftId=${savedDraftId}`)
@@ -231,8 +229,7 @@ function LandLoanContent() {
   const uploadDocumentMutation = useMutation({
     mutationFn: applicationService.uploadDocument,
     onSuccess: (response, variables) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const docData = response.data as any
+      const docData = response.data as { documentUrl: string; uploadedAt: string }
       console.log(docData)
 
       setFormData(prev => ({
@@ -272,12 +269,11 @@ function LandLoanContent() {
 
 
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     let finalValue = value
 
     // Format amount fields
-    if (["monthlyIncome", "loanAmount", "landCost"].includes(field)) {
+    if (["monthlyIncome", "loanAmount", "landCost"].includes(field) && typeof value === 'string') {
       finalValue = formatNumber(value)
     }
 
@@ -316,10 +312,9 @@ function LandLoanContent() {
     const payload = {
       ...submissionPayload,
       draftId: draftId || undefined
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    }
 
-    submitApplicationMutation.mutate(payload)
+    submitApplicationMutation.mutate(payload as unknown as ApplicationRequestType)
     // setIsSubmitting(false) 
   }
 

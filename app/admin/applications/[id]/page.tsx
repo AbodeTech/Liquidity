@@ -270,7 +270,7 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
               <div>
                 <p className="text-sm text-muted-foreground">Monthly Income</p>
                 <p className="font-medium">
-                  {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.employment?.monthlyIncome || 0)}
+                  {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.employment?.monthlyIncome ?? 0)}
                 </p>
               </div>
               <div>
@@ -303,13 +303,13 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
                   <div>
                     <p className="text-sm text-muted-foreground">Desired Loan Amount</p>
                     <p className="font-medium text-lg">
-                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.rentLoanDetails.desiredLoanAmount)}
+                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.rentLoanDetails.desiredLoanAmount ?? 0)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Annual Rent Amount</p>
                     <p className="font-medium">
-                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.rentLoanDetails.annualRentAmount)}
+                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.rentLoanDetails.annualRentAmount ?? 0)}
                     </p>
                   </div>
                   <div>
@@ -328,13 +328,13 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
                   <div>
                     <p className="text-sm text-muted-foreground">Desired Loan Amount</p>
                     <p className="font-medium text-lg">
-                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.landLoanDetails.desiredLoanAmount)}
+                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.landLoanDetails.desiredLoanAmount ?? 0)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Land Cost</p>
                     <p className="font-medium">
-                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.landLoanDetails.totalLandCost)}
+                      {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(application.landLoanDetails.totalLandCost ?? 0)}
                     </p>
                   </div>
                   <div>
@@ -367,22 +367,22 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
                 <>
                   <div>
                     <p className="text-sm text-muted-foreground">Property Address</p>
-                    <p className="font-medium">{application.rentLoanDetails.propertyAddress}</p>
+                    <p className="font-medium">{application.rentLoanDetails.propertyAddress || 'N/A'}</p>
                   </div>
                   <div className="pt-2 border-t">
                     <p className="text-sm font-semibold mb-2">Landlord Information</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-muted-foreground">Name</p>
-                        <p className="font-medium">{application.rentLoanDetails.landlordInfo.landlordFullName}</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordInfo?.landlordFullName || 'N/A'}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Phone</p>
-                        <p className="font-medium">{application.rentLoanDetails.landlordInfo.landlordPhoneNumber}</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordInfo?.landlordPhoneNumber || 'N/A'}</p>
                       </div>
                       <div className="col-span-2">
                         <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="font-medium">{application.rentLoanDetails.landlordInfo.landlordEmail}</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordInfo?.landlordEmail || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
@@ -391,15 +391,15 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-muted-foreground">Bank Name</p>
-                        <p className="font-medium">{application.rentLoanDetails.landlordBankDetails.landlordBankName}</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordBankDetails?.landlordBankName || 'N/A'}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Account Number</p>
-                        <p className="font-medium">{application.rentLoanDetails.landlordBankDetails.landlordBankAccountNumber}</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordBankDetails?.landlordBankAccountNumber || 'N/A'}</p>
                       </div>
                       <div className="col-span-2">
                         <p className="text-sm text-muted-foreground">Account Name</p>
-                        <p className="font-medium">{application.rentLoanDetails.landlordBankDetails.landlordAccountName}</p>
+                        <p className="font-medium">{application.rentLoanDetails.landlordBankDetails?.landlordAccountName || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
@@ -410,22 +410,22 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
                 <>
                   <div>
                     <p className="text-sm text-muted-foreground">Land Location</p>
-                    <p className="font-medium">{application.landLoanDetails.landLocation}</p>
+                    <p className="font-medium">{application.landLoanDetails.landLocation || 'N/A'}</p>
                   </div>
                   <div className="pt-2 border-t">
                     <p className="text-sm font-semibold mb-2">Developer/Seller Information</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-muted-foreground">Name</p>
-                        <p className="font-medium">{application.landLoanDetails.developerSellerInfo.developerSellerName}</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerInfo?.developerSellerName || 'N/A'}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Phone</p>
-                        <p className="font-medium">{application.landLoanDetails.developerSellerInfo.developerSellerPhone}</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerInfo?.developerSellerPhone || 'N/A'}</p>
                       </div>
                       <div className="col-span-2">
                         <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="font-medium">{application.landLoanDetails.developerSellerInfo.developerSellerEmail}</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerInfo?.developerSellerEmail || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
@@ -434,15 +434,15 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-muted-foreground">Bank Name</p>
-                        <p className="font-medium">{application.landLoanDetails.developerSellerBankDetails.developerSellerBankName}</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerBankDetails?.developerSellerBankName || 'N/A'}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Account Number</p>
-                        <p className="font-medium">{application.landLoanDetails.developerSellerBankDetails.developerSellerAccountNumber}</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerBankDetails?.developerSellerAccountNumber || 'N/A'}</p>
                       </div>
                       <div className="col-span-2">
                         <p className="text-sm text-muted-foreground">Account Name</p>
-                        <p className="font-medium">{application.landLoanDetails.developerSellerBankDetails.developerSellerAccountName}</p>
+                        <p className="font-medium">{application.landLoanDetails.developerSellerBankDetails?.developerSellerAccountName || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
