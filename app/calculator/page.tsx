@@ -50,7 +50,7 @@ export default function CalculatorPage() {
 
       {/* --- BACKGROUND TEXTURE --- */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]" />
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#1a4d3e]/5 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#d4a574]/10 rounded-full blur-[100px] -translate-x-1/2 translate-y-1/2" />
       </div>
@@ -273,7 +273,7 @@ export default function CalculatorPage() {
 
 function InputCard({ title, description, children }: { title: string, description: string, children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-[#e5e5e5] shadow-lg shadow-[#1a4d3e]/5">
+    <div className="bg-white rounded-4xl p-6 sm:p-8 border border-[#e5e5e5] shadow-lg shadow-[#1a4d3e]/5">
       <div className="mb-8">
         <h3 className="text-xl font-bold text-[#1a1a1a]">{title}</h3>
         <p className="text-sm text-[#666666]">{description}</p>

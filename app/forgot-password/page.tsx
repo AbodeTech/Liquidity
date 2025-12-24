@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
   // --- BACKGROUND COMPONENT (Reused) ---
   const Background = () => (
     <div className="absolute inset-0 w-full h-full pointer-events-none">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]" />
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#1a4d3e]/5 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#d4a574]/10 rounded-full blur-[100px] -translate-x-1/2 translate-y-1/2" />
     </div>
@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
             </Link>
           </div>
 
-          <div className="bg-white rounded-[2rem] shadow-2xl shadow-[#1a4d3e]/10 border border-[#e5e5e5] p-8 md:p-10 text-center">
+          <div className="bg-white rounded-4xl shadow-2xl shadow-[#1a4d3e]/10 border border-[#e5e5e5] p-8 md:p-10 text-center">
             <div className="mx-auto w-14 h-14 bg-[#ecfdf5] rounded-full flex items-center justify-center mb-6">
               <CheckCircle2 className="h-7 w-7 text-[#10b981]" />
             </div>
@@ -127,7 +127,7 @@ export default function ForgotPasswordPage() {
           </Link>
         </div>
 
-        <div className="bg-white rounded-[2rem] shadow-2xl shadow-[#1a4d3e]/10 border border-[#e5e5e5] p-8 md:p-10">
+        <div className="bg-white rounded-4xl shadow-2xl shadow-[#1a4d3e]/10 border border-[#e5e5e5] p-8 md:p-10">
           <Link
             href="/login"
             className="inline-flex items-center gap-2 text-sm font-medium text-[#666666] hover:text-[#1a4d3e] mb-6 transition-colors"
