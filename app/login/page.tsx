@@ -65,7 +65,7 @@ export default function LoginPage() {
         toast.error("Login successful but no token received")
       }
     },
-    onError: (error: any) => {
+    onError: (error: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       const message = error.response?.data?.message || "Login failed. Please check your credentials."
       toast.error(message)
     },

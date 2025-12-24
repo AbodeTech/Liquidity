@@ -5,9 +5,8 @@ import { Slider } from "@/components/ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
 import { useState } from "react"
-import { ArrowLeft, Calculator, HelpCircle, Info, Sparkles } from "lucide-react"
+import { ArrowLeft, Calculator, Info, Sparkles } from "lucide-react"
 import Image from "next/image"
-import { motion, AnimatePresence } from "framer-motion"
 
 export default function CalculatorPage() {
   // --- STATE ---
@@ -19,7 +18,6 @@ export default function CalculatorPage() {
   const [landTenure, setLandTenure] = useState(24)
   const landInterestRate = 0.2 // 20% flat
 
-  const processingFee = 5000
   const depositPercentage = 0.2
 
   // --- CALCULATIONS ---

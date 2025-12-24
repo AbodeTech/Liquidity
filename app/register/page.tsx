@@ -70,7 +70,7 @@ export default function RegisterPage() {
         router.push("/login")
       }
     },
-    onError: (error: any) => {
+    onError: (error: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       const message = error.response?.data?.message || "Registration failed. Please try again."
       toast.error(message)
     },

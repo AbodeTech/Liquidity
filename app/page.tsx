@@ -3,24 +3,17 @@
 import type React from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowRight, Home, Clock, Shield, Calculator, CheckCircle, Building2, Landmark } from "lucide-react"
+import { Home, Clock, Shield, Calculator, CheckCircle, Building2, Landmark } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { useState, useEffect } from "react"
 import HeroSection from "@/components/LandingPage" // Assuming this is where you put the Hero code
 import CtaSection from "@/components/CtaSection" // Assuming this is where you put the CTA code
 
-const words = ["Home", "Land"]
+
 
 export default function LandingPage() {
-  const [currentWord, setCurrentWord] = useState(0)
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentWord((prev) => (prev + 1) % words.length)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
+
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault()
@@ -200,7 +193,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-3xl font-bold text-[#1a1a1a] mb-4">Rent Loan</h3>
                 <p className="text-[#666666] mb-8 leading-relaxed text-lg">
-                  Don't let bulk rent payments stress you. We pay your landlord upfront, and you repay us in convenient monthly installments.
+                  Don&apos;t let bulk rent payments stress you. We pay your landlord upfront, and you repay us in convenient monthly installments.
                 </p>
                 <ul className="space-y-3 mb-8">
                   {["Up to ₦5 Million", "Instant Pre-approval", "Flexible Repayment"].map((item, i) => (
