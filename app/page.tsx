@@ -1,14 +1,14 @@
 "use client"
 
 import type React from "react"
-
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { ArrowRight, Home, Clock, Shield, Calculator, CheckCircle, Building2, Landmark } from "lucide-react"
 import Image from "next/image"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
+import HeroSection from "@/components/LandingPage" // Assuming this is where you put the Hero code
+import CtaSection from "@/components/CtaSection" // Assuming this is where you put the CTA code
 
 const words = ["Home", "Land"]
 
@@ -31,17 +31,19 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
+    // Applied the Off-White background globally to match Hero
+    <div className="min-h-screen bg-[#fafaf8] selection:bg-[#1a4d3e] selection:text-white">
+
+      {/* Navigation - Updated to match off-white theme */}
       <motion.nav
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="border-b border-border sticky top-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="fixed top-0 w-full z-50 border-b border-[#1a4d3e]/5 bg-[#fafaf8]/80 backdrop-blur-md supports-[backdrop-filter]:bg-[#fafaf8]/60"
       >
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="inline-block">
-            <div className="relative h-12 w-48">
+        <div className="container mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="inline-block transition-opacity hover:opacity-80">
+            <div className="relative h-10 w-32 md:h-12 md:w-40">
               <Image
                 src="/LIQUIDELogo.png"
                 alt="Liquide Logo"
@@ -51,139 +53,55 @@ export default function LandingPage() {
               />
             </div>
           </Link>
-          <div className="hidden md:flex items-center gap-6">
+
+          <div className="hidden md:flex items-center gap-8">
             <a
               href="#how-it-works"
               onClick={(e) => handleSmoothScroll(e, "#how-it-works")}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              className="text-sm font-medium text-[#666666] hover:text-[#1a4d3e] transition-colors"
             >
               How It Works
             </a>
             <a
               href="#loan-types"
               onClick={(e) => handleSmoothScroll(e, "#loan-types")}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              className="text-sm font-medium text-[#666666] hover:text-[#1a4d3e] transition-colors"
             >
               Loan Types
             </a>
-            <Link href="/calculator" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/calculator" className="text-sm font-medium text-[#666666] hover:text-[#1a4d3e] transition-colors">
               Calculator
             </Link>
-            <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              About
-            </Link>
           </div>
+
           <div className="flex items-center gap-3">
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" asChild className="text-[#1a4d3e] hover:text-[#1a4d3e] hover:bg-[#1a4d3e]/5">
               <Link href="/login">Log In</Link>
             </Button>
-            <Button asChild>
-              <Link href="/register">Sign Up</Link>
+            <Button asChild className="bg-[#1a4d3e] hover:bg-[#153d32] text-white rounded-full px-6 shadow-lg shadow-[#1a4d3e]/20">
+              <Link href="/register">Get Started</Link>
             </Button>
           </div>
         </div>
       </motion.nav>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        {/* Background Images */}
-        <div className="absolute inset-0">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentWord}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1 }}
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage:
-                  currentWord === 0
-                    ? `url('/modern-nigerian-luxury-apartments-at-sunset.jpg')`
-                    : `url('/modern-nigerian-housing-estate-gated-community.jpg')`,
-              }}
-            />
-          </AnimatePresence>
-          <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/60 to-black/40" />
-        </div>
+      {/* Add padding top to account for fixed nav */}
+      <div className="pt-20">
+        <HeroSection />
+      </div>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-                Get Your{" "}
-                <span className="relative inline-block">
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={currentWord}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.5 }}
-                      className="text-primary inline-block"
-                    >
-                      {words[currentWord]}
-                    </motion.span>
-                  </AnimatePresence>
-                </span>{" "}
-                Financing Today
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300">We&apos;re here to help you every step of the way.</p>           <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl">
-                Access quick and affordable loans for rent payments and land purchases. Simple application, fast
-                approval, flexible repayment plans.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" asChild className="text-lg px-8">
-                  <Link href="/dashboard/apply">
-                    Apply for Loan
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  asChild
-                  className="text-lg px-8 bg-white/10 border-white/30 text-white hover:bg-white/20"
-                >
-                  <Link href="/calculator">Calculate Payment</Link>
-                </Button>
-              </div>
-            </motion.div>
-
-            {/* Trust Indicators */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="mt-12 flex flex-wrap gap-6"
-            >
-              <div className="flex items-center gap-2 text-white/80">
-                <CheckCircle className="h-5 w-5 text-primary" />
-                <span>24-Hour Approval</span>
-              </div>
-              <div className="flex items-center gap-2 text-white/80">
-                <CheckCircle className="h-5 w-5 text-primary" />
-                <span>Low Interest Rates</span>
-              </div>
-              <div className="flex items-center gap-2 text-white/80">
-                <CheckCircle className="h-5 w-5 text-primary" />
-                <span>No Hidden Fees</span>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
+      {/* Stats Section - High Contrast Dark Strip */}
       <motion.section
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.6 }}
-        className="bg-linear-to-br from-muted/80 to-muted/40 py-12 relative overflow-hidden"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        className="bg-[#1a4d3e] py-16 relative overflow-hidden"
       >
+        {/* Background texture for the green section */}
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
+
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-5xl mx-auto">
             {[
               { value: "₦500k+", label: "Loans Disbursed" },
               { value: "1,200+", label: "Happy Customers" },
@@ -192,265 +110,258 @@ export default function LandingPage() {
             ].map((stat, index) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="text-center"
+                className="text-center group"
               >
-                <div className="text-3xl md:text-4xl font-bold text-foreground mb-2">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+                <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 tracking-tight group-hover:scale-105 transition-transform duration-300">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-white/70 font-medium uppercase tracking-wider">{stat.label}</div>
               </motion.div>
             ))}
           </div>
         </div>
       </motion.section>
 
-      {/* How It Works */}
-      <section id="how-it-works" className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">How It Works</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Get your loan in 4 simple steps</p>
+      {/* How It Works - Added Grid Background from Hero */}
+      <section id="how-it-works" className="py-24 relative overflow-hidden">
+        {/* Grid Background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-20">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#1a1a1a] mb-6 tracking-tight">How It Works</h2>
+            <p className="text-lg text-[#666666] max-w-2xl mx-auto">Get your property financing sorted in 4 simple steps</p>
           </div>
-          <div className="grid md:grid-cols-4 gap-8">
+
+          <div className="grid md:grid-cols-4 gap-8 relative">
+            {/* Connecting Line (Desktop) */}
+            <div className="hidden md:block absolute top-8 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-transparent via-[#1a4d3e]/20 to-transparent z-0" />
+
             {[
               {
                 icon: Building2,
-                title: "Choose Loan Type",
+                title: "Choose Type",
                 description: "Select rent financing or land purchase loan",
               },
-              { icon: Clock, title: "Quick Application", description: "Fill out our simple online form in minutes" },
+              { icon: Clock, title: "Quick Apply", description: "Fill out our simple online form in 5 minutes" },
               { icon: Shield, title: "Fast Review", description: "Get your application reviewed within 24 hours" },
               {
                 icon: CheckCircle,
-                title: "Receive Funds",
+                title: "Get Funded",
                 description: "Funds disbursed directly to landlord or developer",
               },
             ].map((step, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="text-center"
+                className="relative z-10 text-center group"
               >
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <step.icon className="h-8 w-8 text-primary" />
+                <div className="w-16 h-16 bg-white border border-[#1a4d3e]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#1a4d3e]/5 group-hover:scale-110 group-hover:border-[#1a4d3e]/30 transition-all duration-300">
+                  <step.icon className="h-7 w-7 text-[#1a4d3e]" />
                 </div>
-                <div className="text-sm text-primary font-medium mb-2">Step {index + 1}</div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">{step.title}</h3>
-                <p className="text-muted-foreground">{step.description}</p>
+                <div className="text-xs font-bold text-[#1a4d3e] uppercase tracking-wider mb-2 bg-[#1a4d3e]/5 inline-block px-3 py-1 rounded-full">
+                  Step {index + 1}
+                </div>
+                <h3 className="text-xl font-bold text-[#1a1a1a] mb-3">{step.title}</h3>
+                <p className="text-[#666666] leading-relaxed px-4">{step.description}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Loan Types */}
-      <section id="loan-types" className="py-20">
+      {/* Loan Types - Bento Card Style */}
+      <section id="loan-types" className="py-24 bg-white/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Our Loan Products</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Choose the financing option that suits your needs</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#1a1a1a] mb-6 tracking-tight">Our Loan Products</h2>
+            <p className="text-lg text-[#666666] max-w-2xl mx-auto">Flexible financing options designed for the Nigerian market</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Rent Loan */}
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Rent Loan Card */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
+              className="group"
             >
-              <Card className="h-full border-2 hover:border-primary/50 transition-colors">
-                <CardContent className="p-8">
-                  <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
-                    <Home className="h-7 w-7 text-primary" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-foreground mb-3">Rent Loan</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Get financing for your annual rent payment. We pay your landlord directly while you repay in
-                    comfortable monthly installments.
-                  </p>
-                  <Button asChild className="w-full">
-                    <Link href="/dashboard/apply/rent">Apply for Rent Loan</Link>
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="h-full bg-white rounded-[2.5rem] p-8 md:p-12 border border-[#e5e5e5] shadow-sm hover:shadow-2xl hover:shadow-[#1a4d3e]/10 hover:border-[#1a4d3e]/20 transition-all duration-500">
+                <div className="w-14 h-14 bg-[#1a4d3e]/5 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-[#1a4d3e] transition-colors duration-500">
+                  <Home className="h-7 w-7 text-[#1a4d3e] group-hover:text-white transition-colors duration-500" />
+                </div>
+                <h3 className="text-3xl font-bold text-[#1a1a1a] mb-4">Rent Loan</h3>
+                <p className="text-[#666666] mb-8 leading-relaxed text-lg">
+                  Don't let bulk rent payments stress you. We pay your landlord upfront, and you repay us in convenient monthly installments.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {["Up to ₦5 Million", "Instant Pre-approval", "Flexible Repayment"].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-[#525252]">
+                      <div className="w-5 h-5 rounded-full bg-[#1a4d3e]/10 flex items-center justify-center">
+                        <CheckCircle className="w-3 h-3 text-[#1a4d3e]" />
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button asChild className="w-full h-12 rounded-xl bg-[#1a1a1a] hover:bg-[#1a4d3e] text-white transition-all duration-300">
+                  <Link href="/dashboard/apply/rent">Apply for Rent Loan</Link>
+                </Button>
+              </div>
             </motion.div>
 
-            {/* Land Loan */}
+            {/* Land Loan Card */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
+              className="group"
             >
-              <Card className="h-full border-2 hover:border-primary/50 transition-colors">
-                <CardContent className="p-8">
-                  <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
-                    <Landmark className="h-7 w-7 text-primary" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-foreground mb-3">Land Loan</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Finance your land purchase with flexible payment options. We work with verified developers to secure
-                    your property.
-                  </p>
-                  <Button asChild className="w-full">
-                    <Link href="/dashboard/apply/land">Apply for Land Loan</Link>
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="h-full bg-white rounded-[2.5rem] p-8 md:p-12 border border-[#e5e5e5] shadow-sm hover:shadow-2xl hover:shadow-[#1a4d3e]/10 hover:border-[#1a4d3e]/20 transition-all duration-500">
+                <div className="w-14 h-14 bg-[#d4a574]/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-[#d4a574] transition-colors duration-500">
+                  <Landmark className="h-7 w-7 text-[#d4a574] group-hover:text-white transition-colors duration-500" />
+                </div>
+                <h3 className="text-3xl font-bold text-[#1a1a1a] mb-4">Land Loan</h3>
+                <p className="text-[#666666] mb-8 leading-relaxed text-lg">
+                  Secure your plot of land today. We finance the purchase from verified developers while you pay over time.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {["Verified Titles", "Direct to Developer", "Up to 36 Months"].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-[#525252]">
+                      <div className="w-5 h-5 rounded-full bg-[#d4a574]/20 flex items-center justify-center">
+                        <CheckCircle className="w-3 h-3 text-[#d4a574]" />
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button asChild className="w-full h-12 rounded-xl bg-white border-2 border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white transition-all duration-300">
+                  <Link href="/dashboard/apply/land">Apply for Land Loan</Link>
+                </Button>
+              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us */}
-      <section className="container mx-auto px-4 py-20">
+      {/* Why Choose Us - Minimal Style */}
+      <section className="container mx-auto px-4 py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          viewport={{ once: true }}
+          className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Why Choose Liquide?</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            We make homeownership accessible with transparent processes and customer-first approach.
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#1a1a1a] mb-6">Why Choose Liquide?</h2>
+          <p className="text-[#666666] text-lg max-w-2xl mx-auto">
+            We make homeownership accessible with transparent processes and a customer-first approach.
           </p>
         </motion.div>
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {[
             {
               icon: Clock,
               title: "Fast Approval",
               description: "Get approved within 24 hours. We value your time and make the process seamless.",
+              color: "text-[#1a4d3e]",
+              bg: "bg-[#1a4d3e]/10"
             },
             {
               icon: Shield,
               title: "Secure & Trusted",
               description: "Your data is protected with bank-level security. We are fully compliant with regulations.",
+              color: "text-[#d4a574]",
+              bg: "bg-[#d4a574]/10"
             },
             {
               icon: Calculator,
               title: "Transparent Pricing",
-              description: "No hidden fees. Calculate your exact repayment amount before you apply.",
+              description: "No hidden fees. Calculate your exact repayment amount before you even apply.",
+              color: "text-[#1a1a1a]",
+              bg: "bg-[#1a1a1a]/10"
             },
           ].map((feature, index) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.15 }}
-              className="flex flex-col items-center text-center"
+              className="flex flex-col items-center text-center p-6 rounded-3xl hover:bg-white hover:shadow-xl hover:shadow-[#1a4d3e]/5 transition-all duration-300"
             >
-              <div className="bg-primary/10 p-4 rounded-full mb-4">
-                <feature.icon className="h-8 w-8 text-primary" />
+              <div className={`${feature.bg} p-4 rounded-2xl mb-6`}>
+                <feature.icon className={`h-8 w-8 ${feature.color}`} />
               </div>
-              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+              <h3 className="text-xl font-bold text-[#1a1a1a] mb-3">{feature.title}</h3>
+              <p className="text-[#666666] leading-relaxed">{feature.description}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* CTA Section */}
-      <motion.section
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5 }}
-        className="relative py-20 overflow-hidden"
-      >
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-linear-to-r from-primary via-primary/95 to-accent z-10" />
-          <Image
-            src="/modern-nigerian-housing-estate-gated-community.jpg"
-            alt="Nigerian Housing Estate"
-            fill
-            className="object-cover opacity-20"
-          />
-        </div>
+      <CtaSection />
 
-        <div className="container mx-auto px-4 text-center relative z-20">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance text-white">Ready to Get Started?</h2>
-          <p className="text-lg mb-8 text-white/90 max-w-2xl mx-auto text-pretty leading-relaxed">
-            Join thousands of Nigerians who have achieved their property goals with Liquide. Apply today and get
-            approved in 24 hours.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" asChild className="shadow-xl">
-              <Link href="/dashboard/apply">Start Your Application</Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              asChild
-              className="bg-transparent border-white/40 text-white hover:bg-white/10 backdrop-blur"
-            >
-              <Link href="/calculator">Try Our Calculator</Link>
-            </Button>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* Footer */}
-      <footer className="bg-foreground text-background py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">Liquide</h3>
-              <p className="text-background/70 text-sm">Making home and land financing accessible to all Nigerians.</p>
+      {/* Footer - Matched to Dark Green Theme */}
+      <footer className="bg-[#1a4d3e] text-white pt-20 pb-10 rounded-t-[3rem] mt-[-2rem] relative z-10">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="grid md:grid-cols-4 gap-12 mb-16">
+            <div className="col-span-1 md:col-span-1">
+              <div className="flex items-center gap-2 mb-6">
+                {/* Placeholder for White Logo version */}
+                <span className="text-2xl font-bold">Liquide.</span>
+              </div>
+              <p className="text-white/70 text-sm leading-relaxed mb-6">
+                Making home and land financing accessible to all Nigerians through technology and trust.
+              </p>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-sm text-background/70">
-                <li>
-                  <Link href="/about" className="hover:text-background">
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/calculator" className="hover:text-background">
-                    Loan Calculator
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/dashboard/apply" className="hover:text-background">
-                    Apply for Loan
-                  </Link>
-                </li>
+              <h4 className="font-bold text-lg mb-6 text-[#d4a574]">Quick Links</h4>
+              <ul className="space-y-4 text-sm text-white/70">
+                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/calculator" className="hover:text-white transition-colors">Loan Calculator</Link></li>
+                <li><Link href="/dashboard/apply" className="hover:text-white transition-colors">Apply for Loan</Link></li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-background/70">
-                <li>
-                  <Link href="/terms" className="hover:text-background">
-                    Terms of Service
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="hover:text-background">
-                    Privacy Policy
-                  </Link>
-                </li>
+              <h4 className="font-bold text-lg mb-6 text-[#d4a574]">Legal</h4>
+              <ul className="space-y-4 text-sm text-white/70">
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/faq" className="hover:text-white transition-colors">FAQs</Link></li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2 text-sm text-background/70">
-                <li>support@liquide.ng</li>
+              <h4 className="font-bold text-lg mb-6 text-[#d4a574]">Contact</h4>
+              <ul className="space-y-4 text-sm text-white/70">
+                <li className="flex items-center gap-2">support@liquide.ng</li>
                 <li>Lagos, Nigeria</li>
+                <li className="pt-2 flex gap-4">
+                  {/* Social Icons Placeholders */}
+                  <div className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#d4a574] transition-colors cursor-pointer" />
+                  <div className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#d4a574] transition-colors cursor-pointer" />
+                  <div className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#d4a574] transition-colors cursor-pointer" />
+                </li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-background/20 pt-8 text-center text-sm text-background/60">
-            © {new Date().getFullYear()} Liquide. All rights reserved.
+
+          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/40">
+            <p>© {new Date().getFullYear()} Liquide. All rights reserved.</p>
+            <p>Designed for Nigerian Homes.</p>
           </div>
         </div>
       </footer>
