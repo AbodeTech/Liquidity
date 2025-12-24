@@ -3,24 +3,17 @@
 import type React from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowRight, Home, Clock, Shield, Calculator, CheckCircle, Building2, Landmark } from "lucide-react"
+import { Home, Clock, Shield, Calculator, CheckCircle, Building2, Landmark } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { useState, useEffect } from "react"
 import HeroSection from "@/components/LandingPage" // Assuming this is where you put the Hero code
 import CtaSection from "@/components/CtaSection" // Assuming this is where you put the CTA code
 
-const words = ["Home", "Land"]
+
 
 export default function LandingPage() {
-  const [currentWord, setCurrentWord] = useState(0)
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentWord((prev) => (prev + 1) % words.length)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
+
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault()
@@ -39,7 +32,7 @@ export default function LandingPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="fixed top-0 w-full z-50 border-b border-[#1a4d3e]/5 bg-[#fafaf8]/80 backdrop-blur-md supports-[backdrop-filter]:bg-[#fafaf8]/60"
+        className="fixed top-0 w-full z-50 border-b border-[#1a4d3e]/5 bg-[#fafaf8]/80 backdrop-blur-md supports-backdrop-filter:bg-[#fafaf8]/60"
       >
         <div className="container mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="inline-block transition-opacity hover:opacity-80">
@@ -98,7 +91,7 @@ export default function LandingPage() {
         className="bg-[#1a4d3e] py-16 relative overflow-hidden"
       >
         {/* Background texture for the green section */}
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-size-[16px_16px]" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-5xl mx-auto">
@@ -129,7 +122,7 @@ export default function LandingPage() {
       {/* How It Works - Added Grid Background from Hero */}
       <section id="how-it-works" className="py-24 relative overflow-hidden">
         {/* Grid Background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-20">
@@ -139,7 +132,7 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-4 gap-8 relative">
             {/* Connecting Line (Desktop) */}
-            <div className="hidden md:block absolute top-8 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-transparent via-[#1a4d3e]/20 to-transparent z-0" />
+            <div className="hidden md:block absolute top-8 left-[12%] right-[12%] h-0.5 bg-linear-to-r from-transparent via-[#1a4d3e]/20 to-transparent z-0" />
 
             {[
               {
@@ -200,7 +193,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-3xl font-bold text-[#1a1a1a] mb-4">Rent Loan</h3>
                 <p className="text-[#666666] mb-8 leading-relaxed text-lg">
-                  Don't let bulk rent payments stress you. We pay your landlord upfront, and you repay us in convenient monthly installments.
+                  Don&apos;t let bulk rent payments stress you. We pay your landlord upfront, and you repay us in convenient monthly installments.
                 </p>
                 <ul className="space-y-3 mb-8">
                   {["Up to ₦5 Million", "Instant Pre-approval", "Flexible Repayment"].map((item, i) => (
@@ -313,7 +306,7 @@ export default function LandingPage() {
       <CtaSection />
 
       {/* Footer - Matched to Dark Green Theme */}
-      <footer className="bg-[#1a4d3e] text-white pt-20 pb-10 rounded-t-[3rem] mt-[-2rem] relative z-10">
+      <footer className="bg-[#1a4d3e] text-white pt-20 pb-10 rounded-t-[3rem] -mt-8 relative z-10">
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid md:grid-cols-4 gap-12 mb-16">
             <div className="col-span-1 md:col-span-1">
